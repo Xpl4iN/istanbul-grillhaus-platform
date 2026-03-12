@@ -1,0 +1,44 @@
+name: Deploy Istanbul Grillhaus
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Build application
+      run: npm run build
+      
+    - name: Build Docker image
+      run: docker build -t istanbul-grillhaus:${{ github.sha }} .
+      
+    - name: Push to registry (if needed)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "Push to container registry would happen here"
+        # docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+        # docker tag istanbul-grillhaus:${{ github.sha }} your-registry/istanbul-grillhaus:${{ github.sha }}
+        # docker push your-registry/istanbul-grillhaus:${{ github.sha }}
