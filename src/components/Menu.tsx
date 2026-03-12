@@ -136,20 +136,17 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     return (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20 pt-4">
             {/* Header */}
-            <header className="mb-6 rounded-2xl overflow-hidden shadow-2xl"
-                style={{ background: "linear-gradient(160deg,#0a5c45 0%,#096a50 50%,#074f3c 100%)", border: "3px solid #0d7a5e" }}>
+            <header className="mb-6 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0a5c45] via-[#096a50] to-[#074f3c] border-3 border-[#0d7a5e]">
                 <div className="px-8 pt-8 pb-4 text-center">
-                    <h1 className={`${signFont.className} text-7xl sm:text-9xl tracking-widest text-white leading-none`}
-                        style={{ textShadow: "0 3px 8px rgba(0,0,0,0.6)" }}>
+                    <h1 className={`${signFont.className} text-7xl sm:text-9xl tracking-widest text-white leading-none drop-shadow-[0_3px_8px_rgba(0,0,0,0.6)]`}>
                         İSTANBUL
                     </h1>
-                    <div style={{ height: "2px", background: "linear-gradient(90deg,transparent,#b8860b,transparent)", margin: "8px auto", width: "80%" }} />
-                    <p className="text-xl font-light" style={{ color: "#e8d5a3", letterSpacing: "0.25em" }}>
+                    <div className="h-0.5 bg-gradient-to-r from-transparent via-[#b8860b] to-transparent mx-auto my-2 w-4/5" />
+                    <p className="text-xl font-light text-[#e8d5a3] tracking-[0.25em]">
                         DÖNER · PIZZA · GRILLHAUS
                     </p>
                 </div>
-                <div className="flex justify-center gap-4 flex-wrap text-sm px-6 py-3"
-                    style={{ background: "rgba(0,0,0,0.25)", color: "#a8d5c0" }}>
+                <div className="flex justify-center gap-4 flex-wrap text-sm px-6 py-3 bg-black/25 text-[#a8d5c0]">
                     <span>📍 Münchener Str. 9, Weilheim</span>
                     <span>📞 0881 92706810</span>
                     <span>🥩 100% Halal</span>
@@ -159,13 +156,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             {/* Status Banner */}
             <div className="mb-4">
                 {!isCurrentlyOpen ? (
-                    <div className="p-4 rounded-xl text-center font-semibold text-sm border"
-                        style={{ background: "#fdf0f0", borderColor: "#e8b4b4", color: "#7a1a1a" }}>
+                    <div className="p-4 rounded-xl text-center font-semibold text-sm border bg-[#fdf0f0] border-[#e8b4b4] text-[#7a1a1a]">
                         🕒 Geschlossen · Öffnungszeiten: Mo–Sa 10:00–21:30 · So 10:00–21:00
                     </div>
                 ) : (
-                    <div className="p-3 rounded-xl text-center font-semibold text-xs border"
-                        style={{ background: "#f0fdf4", borderColor: "#b4e8c1", color: "#1a7a3a" }}>
+                    <div className="p-3 rounded-xl text-center font-semibold text-xs border bg-[#f0fdf4] border-[#b4e8c1] text-[#1a7a3a]">
                         ✅ Geöffnet · Jetzt vorbestellen & abholen
                     </div>
                 )}
@@ -173,26 +168,13 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
 
             {/* Sticky Category Nav */}
             {!showCheckout && (
-                <div className="sticky top-0 z-40 mb-6"
-                    style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', width: '100vw' }}>
-                    <nav className="px-4 sm:px-6 py-3 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                        <style jsx>{`
-                            .no-scrollbar::-webkit-scrollbar {
-                                display: none;
-                            }
-                        `}</style>
+                <div className="sticky top-0 z-40 mb-6 -mx-4 sm:-mx-6 w-screen">
+                    <nav className="px-4 sm:px-6 py-3 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2">
                         {groupedProducts.map(group => (
                             <button
                                 key={group.categoryId}
                                 onClick={() => scrollToCategory(group.categoryId)}
-                                className="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 border"
-                                style={{
-                                    background: "#fffdf9",
-                                    borderColor: "#ddd0b8",
-                                    color: "#5c4a32",
-                                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-                                }}
+                                className="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 border bg-white border-[#ddd0b8] text-[#5c4a32] shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                             >
                                 {iconFor(group.categoryName)} {group.categoryName}
                             </button>
@@ -205,24 +187,21 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             {showCheckout ? (
                 <div className="space-y-6">
                     <button onClick={() => setShowCheckout(false)}
-                        className="flex items-center gap-2 font-semibold text-sm hover:opacity-70 transition"
-                        style={{ color: "#8b1a1a" }}>
+                        className="flex items-center gap-2 font-semibold text-sm hover:opacity-70 transition text-[#8b1a1a]">
                         ← Zurück zur Speisekarte
                     </button>
-                    <div className="rounded-2xl p-6 border shadow-sm space-y-4"
-                        style={{ background: "#fffdf9", borderColor: "#ddd0b8" }}>
-                        <h2 className="text-xl font-bold" style={{ color: "#1a1008" }}>Ihr Warenkorb</h2>
+                    <div className="rounded-2xl p-6 border shadow-sm space-y-4 bg-[#fffdf9] border-[#ddd0b8]">
+                        <h2 className="text-xl font-bold text-[#1a1008]">Ihr Warenkorb</h2>
                         {items.length === 0 ? (
-                            <p className="text-sm" style={{ color: "#5c4a32" }}>Ihr Warenkorb ist leer.</p>
+                            <p className="text-sm text-[#5c4a32]">Ihr Warenkorb ist leer.</p>
                         ) : (
                             <ul>
                                 {items.map(item => (
-                                    <li key={item.id} className="py-3 flex justify-between items-center border-b last:border-0"
-                                        style={{ borderColor: "#eddfc8" }}>
+                                    <li key={item.id} className="py-3 flex justify-between items-center border-b last:border-0 border-[#eddfc8]">
                                         <div>
-                                            <p className="font-semibold text-sm" style={{ color: "#1a1008" }}>{item.quantity}× {item.product.name}</p>
+                                            <p className="font-semibold text-sm text-[#1a1008]">{item.quantity}× {item.product.name}</p>
                                             {Object.keys(item.modifiers).length > 0 && (
-                                                <ul className="text-[11px] mt-1 space-y-0.5 font-medium" style={{ color: "#8b1a1a", opacity: 0.85 }}>
+                                                <ul className="text-[11px] mt-1 space-y-0.5 font-medium text-[#8b1a1a] opacity-85">
                                                     {Object.entries(item.modifiers).flatMap(([groupId, modIds]) => {
                                                         const group = item.product.modifier_groups?.find(g => g.id === groupId);
                                                         if (!group) return [];
@@ -237,22 +216,19 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                         <div className="flex gap-3 items-center">
                                             <span className="font-bold text-sm">{(item.price * item.quantity).toFixed(2)} €</span>
                                             <button onClick={() => removeItem(item.id)}
-                                                className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
-                                                style={{ background: "#fde8e8", color: "#8b1a1a" }}>✕</button>
+                                                className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center bg-[#fde8e8] text-[#8b1a1a]">✕</button>
                                         </div>
                                     </li>
                                 ))}
                             </ul>
                         )}
-                        <div className="pt-4 flex justify-between font-bold text-lg"
-                            style={{ borderTop: "2px solid #ddd0b8", color: "#1a1008" }}>
+                        <div className="pt-4 flex justify-between font-bold text-lg border-t-2 border-[#ddd0b8] text-[#1a1008]">
                             <span>Gesamtbetrag</span><span>{getTotal().toFixed(2)} €</span>
                         </div>
                     </div>
                     {items.length > 0 && (
                         isCurrentlyOpen ? <Checkout onComplete={() => setShowCheckout(false)} /> : (
-                            <div className="rounded-xl p-5 text-center border font-semibold"
-                                style={{ background: "#fdf0f0", borderColor: "#e8b4b4", color: "#7a1a1a" }}>
+                            <div className="rounded-xl p-5 text-center border font-semibold bg-[#fdf0f0] border-[#e8b4b4] text-[#7a1a1a]">
                                 🕒 Aktuell geschlossen.
                             </div>
                         )
@@ -264,33 +240,31 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         <section key={group.categoryName} id={group.categoryId} className="scroll-mt-24">
                             <div className="flex items-center gap-3 mb-5">
                                 <span className="text-2xl">{iconFor(group.categoryName)}</span>
-                                <h2 className="text-xl font-bold" style={{ color: "#8b1a1a" }}>{group.categoryName}</h2>
-                                <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg,#b8860b55,transparent)" }} />
+                                <h2 className="text-xl font-bold text-[#8b1a1a]">{group.categoryName}</h2>
+                                <div className="flex-1 h-px bg-gradient-to-r from-[#b8860b] to-transparent opacity-30" />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {group.products.map(p => (
                                     <button key={p.id} onClick={() => setSelectedProduct(p)}
-                                        className="text-left w-full rounded-xl p-4 transition-all duration-200 group"
-                                        style={{ background: "#fffdf9", border: "1px solid #ddd0b8", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                                        className="text-left w-full rounded-xl p-4 transition-all duration-200 group bg-[#fffdf9] border border-[#ddd0b8] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                                         <div className="flex justify-between items-start gap-2">
                                             <div>
-                                                <h3 className="font-semibold text-base" style={{ color: "#1a1008" }}>
+                                                <h3 className="font-semibold text-base text-[#1a1008]">
                                                     {p.name}
                                                     <ProductSuperscript allergens={p.allergens} additives={p.additives} />
                                                 </h3>
-                                                {p.description && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: "#7a6248" }}>{p.description}</p>}
+                                                {p.description && <p className="text-xs mt-1.5 line-clamp-2 text-[#7a6248]">{p.description}</p>}
                                                 {p.deposit_amount && p.deposit_amount > 0 && (
-                                                    <p className="text-[10px] mt-1 font-medium opacity-70" style={{ color: "#5c4a32" }}>
+                                                    <p className="text-[10px] mt-1 font-medium opacity-70 text-[#5c4a32]">
                                                         Inkl. {p.deposit_amount.toFixed(2)} € Pfand
                                                     </p>
                                                 )}
                                             </div>
-                                            <span className="shrink-0 font-bold text-sm px-2 py-0.5 rounded-md transition-colors group-hover:bg-[#a12323]"
-                                                style={{ background: "#8b1a1a", color: "#fff", minWidth: "54px", textAlign: "center" }}>
+                                            <span className="shrink-0 font-bold text-sm px-2 py-0.5 rounded-md transition-colors group-hover:bg-[#a12323] bg-[#8b1a1a] text-white min-w-[54px] text-center">
                                                 {p.base_price.toFixed(2)} €
                                             </span>
                                         </div>
-                                        {(p.modifier_groups?.length ?? 0) > 0 && <p className="text-xs mt-3 font-medium flex items-center gap-1" style={{ color: "#b8860b" }}>Anpassbar <span className="text-[10px]">›</span></p>}
+                                        {(p.modifier_groups?.length ?? 0) > 0 && <p className="text-xs mt-3 font-medium flex items-center gap-1 text-[#b8860b]">Anpassbar <span className="text-[10px]">›</span></p>}
                                     </button>
                                 ))}
                             </div>
@@ -305,12 +279,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             <footer className="mt-16 pt-8 border-t border-[#ddd0b8] text-center space-y-4">
                 <button
                     onClick={() => setShowLMIVModal(true)}
-                    className="text-xs font-semibold hover:underline"
-                    style={{ color: "#8b1a1a" }}
+                    className="text-xs font-semibold hover:underline text-[#8b1a1a]"
                 >
                     Allergene & Zusatzstoffe einsehen
                 </button>
-                <div className="flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest" style={{ color: "#5c4a32" }}>
+                <div className="flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-[#5c4a32]">
                     <Link href="/impressum" className="hover:text-[#8b1a1a] transition-colors">Impressum</Link>
                     <Link href="/datenschutz" className="hover:text-[#8b1a1a] transition-colors">Datenschutz</Link>
                 </div>
@@ -322,12 +295,12 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowLMIVModal(false)}>
                     <div className="bg-[#fffdf9] w-full max-w-md max-h-[80vh] overflow-y-auto rounded-2xl p-6 shadow-2xl border-2 border-[#8b1a1a]" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold" style={{ color: "#8b1a1a" }}>Allergene & Zusatzstoffe</h2>
+                            <h2 className="text-xl font-bold text-[#8b1a1a]">Allergene & Zusatzstoffe</h2>
                             <button onClick={() => setShowLMIVModal(false)} className="text-2xl leading-none">×</button>
                         </div>
                         <div className="grid grid-cols-1 gap-4 text-xs">
                             <section>
-                                <h3 className="font-bold mb-2 border-b pb-1" style={{ color: "#5c4a32" }}>Zusatzstoffe (Zahlen)</h3>
+                                <h3 className="font-bold mb-2 border-b pb-1 text-[#5c4a32]">Zusatzstoffe (Zahlen)</h3>
                                 <div className="grid grid-cols-1 gap-x-4 gap-y-1">
                                     {Object.entries(LMIV_LEGEND).filter(([k]) => !isNaN(Number(k))).map(([k, v]) => (
                                         <div key={k} className="flex gap-2">
@@ -338,7 +311,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 </div>
                             </section>
                             <section className="mt-4">
-                                <h3 className="font-bold mb-2 border-b pb-1" style={{ color: "#5c4a32" }}>Allergene (Buchstaben)</h3>
+                                <h3 className="font-bold mb-2 border-b pb-1 text-[#5c4a32]">Allergene (Buchstaben)</h3>
                                 <div className="grid grid-cols-1 gap-x-4 gap-y-1">
                                     {Object.entries(LMIV_LEGEND).filter(([k]) => isNaN(Number(k))).map(([k, v]) => (
                                         <div key={k} className="flex gap-2">
@@ -363,13 +336,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
 
             {/* Sticky cart button */}
             {!showCheckout && items.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 pointer-events-none flex justify-center z-40"
-                    style={{ background: "linear-gradient(to top,#f5f0e8 60%,transparent)" }}>
+                <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 pointer-events-none flex justify-center z-40 bg-gradient-to-t from-[#f5f0e8] via-[#f5f0e8] to-transparent">
                     <button onClick={() => setShowCheckout(true)}
-                        className="pointer-events-auto w-full max-w-sm flex items-center justify-between py-4 px-6 text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
-                        style={{ background: "linear-gradient(135deg,#8b1a1a 0%,#6b1414 100%)", boxShadow: "0 8px 24px rgba(139,26,26,0.35)" }}>
+                        className="pointer-events-auto w-full max-w-sm flex items-center justify-between py-4 px-6 text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all bg-gradient-to-r from-[#8b1a1a] to-[#6b1414] shadow-[0_8px_24px_rgba(139,26,26,0.35)]">
                         <div className="flex items-center gap-3">
-                            <span className="text-sm px-2 py-0.5 rounded-md font-bold" style={{ background: "rgba(255,255,255,0.2)" }}>{items.length}</span>
+                            <span className="text-sm px-2 py-0.5 rounded-md font-bold bg-white/20">{items.length}</span>
                             <span>Warenkorb & Kasse</span>
                         </div>
                         <span className="text-lg font-bold">{getTotal().toFixed(2)} €</span>
