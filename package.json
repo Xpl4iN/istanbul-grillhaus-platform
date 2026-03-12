@@ -1,6 +1,6 @@
 {
     "name": "istanbul-grillhaus-platform",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "private": true,
     "scripts": {
         "dev": "next dev",
@@ -9,8 +9,7 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@prisma/adapter-pg": "^7.5.0",
-        "@prisma/client": "^7.5.0",
+        "@prisma/client": "^5.22.0",
         "@radix-ui/react-dialog": "^1.1.15",
         "clsx": "^2.1.1",
         "libphonenumber-js": "^1.12.38",
@@ -29,7 +28,7 @@
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.1.6",
-        "prisma": "^7.5.0",
+        "prisma": "^5.22.0",
         "tailwindcss": "^4",
         "typescript": "^5"
     }
