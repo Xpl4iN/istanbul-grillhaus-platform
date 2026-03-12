@@ -64,7 +64,7 @@ export async function PATCH(req: Request) {
             data: { status: "CANCELLED", updated_at: new Date() }
         });
 
-        try { pushCancelEvent(orderId); } catch(e) { console.error(e); }
+        try { pushCancelEvent(orderId); } catch (e) { console.error(e); }
 
         return NextResponse.json({ success: true, message: "Bestellung storniert." });
     } catch (e: any) {

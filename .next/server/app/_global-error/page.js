@@ -1,0 +1,13 @@
+var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_global-error/page.js")
+R.c("server/chunks/ssr/[root-of-the-server]__b5ec2a72._.js")
+R.c("server/chunks/ssr/istanbul-grillhaus-platform_93d89844._.js")
+R.c("server/chunks/ssr/2b943_next_dist_0fad34c9._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__9ae5518a._.js")
+R.c("server/chunks/ssr/2b943_next_dist_ebea26b9._.js")
+R.c("server/chunks/ssr/2b943_next_dist_f1dac6b1._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__d51bfd19._.js")
+R.c("server/chunks/ssr/2b943_next_dist_compiled_f36d2514._.js")
+R.c("server/chunks/ssr/istanbul-grillhaus-platform_src_app_19497da0._.js")
+R.c("server/chunks/ssr/a28a1__next-internal_server_app__global-error_page_actions_b476d77a.js")
+R.m(84157)
+module.exports=R.m(84157).exports

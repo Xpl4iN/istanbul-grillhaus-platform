@@ -25,8 +25,8 @@ const getMenuData = unstable_cache(
         });
 
         // Flatten products for the Menu component, re-attaching the category
-        const products = categories.flatMap(c =>
-            c.products.map(p => ({ ...p, category: c }))
+        const products = categories.flatMap((c: any) =>
+            c.products.map((p: any) => ({ ...p, category: c }))
         );
 
         const settings = await prisma.shopSettings.findUnique({
@@ -55,7 +55,7 @@ const getMenuData = unstable_cache(
         }
 
         return {
-            products: products.sort((a, b) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
+            products: products.sort((a: any, b: any) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
             isOpen,
             openingHours
         };
@@ -65,17 +65,17 @@ const getMenuData = unstable_cache(
 );
 
 export default async function Home() {
-  const { products, isOpen, openingHours } = await getMenuData();
-  
-  return (
-    <main className="min-h-screen bg-gray-50/50">
-      <TestModeToggle />
-      <OrderTracker />
-      <Menu 
-        initialProducts={products as any} 
-        initialIsOpen={isOpen} 
-        openingHours={openingHours}
-      />
-    </main>
-  );
+    const { products, isOpen, openingHours } = await getMenuData();
+
+    return (
+        <main className="min-h-screen bg-gray-50/50">
+            <TestModeToggle />
+            <OrderTracker />
+            <Menu
+                initialProducts={products as any}
+                initialIsOpen={isOpen}
+                openingHours={openingHours}
+            />
+        </main>
+    );
 }

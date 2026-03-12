@@ -73,17 +73,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Bestellung online nicht möglich. Bitte rufe direkt im Laden an." }, { status: 403 });
         }
 
-        const dbCustomer = await prisma.customer.upsert({
-            where: { phone_normalized: phoneNormalized  },
-            update: { name: customer.name },
-            create: { name: customer.name, phone_normalized: phoneNormalized}
+        let dbCustomer = await prisma.customer.findFirst({
+            where: { phone_normalized: phoneNormalized }
         });
+
+        if (!dbCustomer) {
+            dbCustomer = await prisma.customer.create({
+                data: { name: customer.name, phone_normalized: phoneNormalized }
+            });
+        } else {
+            dbCustomer = await prisma.customer.update({
+                where: { id: dbCustomer.id },
+                data: { name: customer.name }
+            });
+        }
 
         const shortId = generateShortId();
 
         const order = await prisma.order.create({
             data: {
-                
                 short_id: shortId,
                 customer_id: dbCustomer.id,
                 total_price,

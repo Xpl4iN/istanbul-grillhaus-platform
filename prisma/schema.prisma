@@ -4,8 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -73,12 +71,14 @@ model Modifier {
 
 model Order {
   id             String      @id @default(uuid())
+  short_id       String      @unique
   customer_id    String
   status         String      @default("PENDING")
   total_price    Float
   pickup_time    DateTime
   ip_address     String?
   tip_amount     Float?      @default(0)
+  dining_option  String?
   created_at     DateTime    @default(now())
   updated_at     DateTime    @default(now())
   

@@ -41,7 +41,7 @@ export async function GET() {
 
         return NextResponse.json(
             {
-                products: products.sort((a, b) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
+                products: products.sort((a: any, b: any) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
                 shopSettings: settings,
                 isOpen
             },
