@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useMemo } from 'react';
 import { Product, ModifierGroup, useCartStore } from "@/store/cartStore";
 
@@ -22,14 +22,14 @@ export default function Configurator({ product, onClose }: { product: Product, o
 
     const filteredModifierGroups = useMemo(() => {
         const hasDrinkInCart = items.some(item => 
-            item.product.category?.name === 'Getr�nke' || 
+            item.product.category?.name === 'Getränke' || 
             item.product.name.toLowerCase().includes('cola') ||
             item.product.name.toLowerCase().includes('fanta') ||
             item.product.name.toLowerCase().includes('ayran')
         );
 
         return (product.modifier_groups || []).filter(group => {
-            if (group.name === 'M�chten Sie ein Getr�nk dazu?' && hasDrinkInCart) {
+            if (group.name === 'Möchten Sie ein Getränk dazu?' && hasDrinkInCart) {
                 return false;
             }
             return true;
@@ -95,12 +95,12 @@ export default function Configurator({ product, onClose }: { product: Product, o
                         <p className="text-[#5c4a32] text-sm mt-1">{product.description}</p>
                         {product.deposit_amount && product.deposit_amount > 0 && (
                             <p className="text-[10px] mt-1 font-bold opacity-70" style={{ color: "#8b1a1a" }}>
-                                Inkl. {product.deposit_amount.toFixed(2)} � Pfand
+                                Inkl. {product.deposit_amount.toFixed(2)} € Pfand
                             </p>
                         )}
                     </div>
                     <button onClick={onClose} className="p-2 bg-[#f5f0e8] hover:bg-[#eddfc8] rounded-full text-[#1a1008] transition-colors">
-                        ?
+                        ✕
                     </button>
                 </div>
 
@@ -121,7 +121,7 @@ export default function Configurator({ product, onClose }: { product: Product, o
                                 <div className="grid grid-cols-1 gap-2">
                                     {group.modifiers.map(modifier => {
                                         const isSelected = currentSelections.includes(modifier.id);
-                                        const priceString = Number(modifier.price_delta) > 0 ? `+ ${Number(modifier.price_delta).toFixed(2)} �` : '';
+                                        const priceString = Number(modifier.price_delta) > 0 ? `+ ${Number(modifier.price_delta).toFixed(2)} €` : '';
 
                                         return (
                                             <button
@@ -147,7 +147,7 @@ export default function Configurator({ product, onClose }: { product: Product, o
                                                         w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors
                                                         ${isSelected ? 'border-[#8b1a1a] bg-[#8b1a1a]' : 'border-[#ddd0b8]'}
                                                     `}>
-                                                        {isSelected && <span className="text-white text-[10px]">?</span>}
+                                                        {isSelected && <span className="text-white text-[10px]">✓</span>}
                                                     </div>
                                                 </div>
                                             </button>
@@ -171,8 +171,8 @@ export default function Configurator({ product, onClose }: { product: Product, o
                             }
                         `}
                     >
-                        <span>{isValid ? 'In den Warenkorb' : 'Auswahl vervollst�ndigt'}</span>
-                        <span className="text-lg">{currentTotal.toFixed(2)} �</span>
+                        <span>{isValid ? 'In den Warenkorb' : 'Auswahl vervollständigt'}</span>
+                        <span className="text-lg">{currentTotal.toFixed(2)} €</span>
                     </button>
                 </div>
             </div>

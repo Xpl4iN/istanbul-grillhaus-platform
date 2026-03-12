@@ -6,9 +6,11 @@ import { unstable_cache } from "next/cache";
 
 const getMenuData = unstable_cache(
     async () => {
+        const ISTANBUL_ORG_ID = 'cmmb6n8xu0001o7fwaw73p1lr';
+        const ISTANBUL_SETTINGS_ID = 'cmmb6r26m000ro77865hy6nvu';
 
         const categories = await prisma.category.findMany({
-            where: { is_active: true },
+            where: { organizationId: ISTANBUL_ORG_ID, is_active: true },
             include: {
                 products: {
                     where: { is_available: true },
@@ -25,12 +27,12 @@ const getMenuData = unstable_cache(
         });
 
         // Flatten products for the Menu component, re-attaching the category
-        const products = categories.flatMap((c: any) =>
-            c.products.map((p: any) => ({ ...p, category: c }))
+        const products = categories.flatMap(c =>
+            c.products.map(p => ({ ...p, category: c }))
         );
 
         const settings = await prisma.shopSettings.findUnique({
-            where: { id: 'default' }
+            where: { id: ISTANBUL_SETTINGS_ID }
         });
 
         let isOpen = false;
@@ -55,7 +57,7 @@ const getMenuData = unstable_cache(
         }
 
         return {
-            products: products.sort((a: any, b: any) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
+            products: products.sort((a, b) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
             isOpen,
             openingHours
         };
@@ -65,17 +67,17 @@ const getMenuData = unstable_cache(
 );
 
 export default async function Home() {
-    const { products, isOpen, openingHours } = await getMenuData();
-
-    return (
-        <main className="min-h-screen bg-gray-50/50">
-            <TestModeToggle />
-            <OrderTracker />
-            <Menu
-                initialProducts={products as any}
-                initialIsOpen={isOpen}
-                openingHours={openingHours}
-            />
-        </main>
-    );
+  const { products, isOpen, openingHours } = await getMenuData();
+  
+  return (
+    <main className="min-h-screen bg-gray-50/50">
+      <TestModeToggle />
+      <OrderTracker />
+      <Menu 
+        initialProducts={products as any} 
+        initialIsOpen={isOpen} 
+        openingHours={openingHours}
+      />
+    </main>
+  );
 }

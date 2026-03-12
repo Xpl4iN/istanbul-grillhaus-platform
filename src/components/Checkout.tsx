@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useMemo, useEffect } from "react";
 import Script from "next/script";
 import { useCartStore } from "@/store/cartStore";
@@ -8,7 +8,8 @@ const DiningTile = ({
     label,
     sublabel,
     selected,
-    onClick}: {
+    onClick,
+}: {
     icon: string;
     label: string;
     sublabel: string;
@@ -28,7 +29,7 @@ const DiningTile = ({
         `}
     >
         {selected && (
-            <span className="absolute top-2 right-2 text-xs bg-white/20 rounded-full px-1.5 py-0.5 font-bold">?</span>
+            <span className="absolute top-2 right-2 text-xs bg-white/20 rounded-full px-1.5 py-0.5 font-bold">✓</span>
         )}
         <span className="text-3xl">{icon}</span>
         <span className="font-bold text-sm leading-tight">{label}</span>
@@ -102,7 +103,7 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
         return (
             <div className="bg-white p-6 rounded-2xl shadow-xl space-y-4 text-center">
                 <h2 className="text-xl font-bold">Kasse noch geschlossen</h2>
-                <p className="text-sm">Wir nehmen Vorbestellungen f�r heute erst ab <strong>09:00 Uhr</strong> f�r Abholungen ab 10:30 Uhr entgegen.</p>
+                <p className="text-sm">Wir nehmen Vorbestellungen für heute erst ab <strong>09:00 Uhr</strong> für Abholungen ab 10:30 Uhr entgegen.</p>
             </div>
         );
     }
@@ -110,11 +111,11 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
     const handleOrder = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!diningOption) {
-            alert("Bitte w�hlen Sie, ob Sie Vor-Ort essen oder mitnehmen m�chten.");
+            alert("Bitte wählen Sie, ob Sie Vor-Ort essen oder mitnehmen möchten.");
             return;
         }
         if (!turnstileToken && !isTestMode) {
-            alert("Bitte best�stigen Sie, dass Sie ein Mensch sind.");
+            alert("Bitte bestästigen Sie, dass Sie ein Mensch sind.");
             return;
         }
 
@@ -146,7 +147,9 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                     total_price: getTotal() + tip,
                     tip_amount: tip,
                     dining_option: diningOption,
-                    turnstile_token: isTestMode ? "mock-token-for-dev" : turnstileToken})});
+                    turnstile_token: isTestMode ? "mock-token-for-dev" : turnstileToken,
+                }),
+            });
 
             const data = await res.json();
             if (!res.ok) {
@@ -173,19 +176,19 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                 {/* Dining Option Tiles */}
                 <div>
                     <label className="block text-sm font-semibold text-[#1a1008] mb-2">
-                        Wie m�chten Sie essen?
+                        Wie möchten Sie essen?
                         <span className="text-[#8b1a1a] ml-1">*</span>
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                         <DiningTile
-                            icon="??"
+                            icon="🏠"
                             label="Mitnehmen"
                             sublabel="Zum Mitnehmen verpackt"
                             selected={diningOption === "takeaway"}
                             onClick={() => setDiningOption("takeaway")}
                         />
                         <DiningTile
-                            icon="???"
+                            icon="🍽️"
                             label="Vor Ort"
                             sublabel="Im Restaurant essen"
                             selected={diningOption === "dine-in"}
@@ -205,7 +208,7 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                 <div>
                     <label className="block text-sm font-medium text-[#1a1008]">Wunsch-Abholzeit</label>
                     <select required value={time} onChange={(e) => setTime(e.target.value)} className="w-full mt-1 p-2.5 border border-[#ddd0b8] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#8b1a1a]/30">
-                        <option value="">Bitte w�hlen...</option>
+                        <option value="">Bitte wählen...</option>
                         {timeOptions.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
@@ -230,7 +233,7 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                                     onClick={() => setTip(amt)}
                                     className={`py-2 px-1 text-sm rounded-xl border ${tip === amt ? 'bg-[#8b1a1a] text-white border-[#8b1a1a]' : 'bg-white text-[#5c4a32] border-[#ddd0b8] hover:bg-[#fdf5ee]'}`}
                                 >
-                                    {idx === 0 ? "Keines" : idx === 3 ? "10%" : amt.toFixed(2) + " �"}
+                                    {idx === 0 ? "Keines" : idx === 3 ? "10%" : amt.toFixed(2) + " €"}
                                 </button>
                             ))}
                         </div>
@@ -247,14 +250,15 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                                     sitekey: typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "1x00000000000000000000AA" : process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
                                     callback: (token: string) => setTurnstileToken(token),
                                     "expired-callback": () => setTurnstileToken(""),
-                                    "error-callback": () => setTurnstileToken("")});
+                                    "error-callback": () => setTurnstileToken(""),
+                                });
                             }}
                         />
                     </div>
                 )}
                 {isTestMode && (
                     <div className="p-3 bg-red-50 text-red-800 text-sm rounded-xl text-center font-bold border border-red-200">
-                        ?? Testmodus aktiv (Cloudflare umgangen)
+                        ⚠️ Testmodus aktiv (Cloudflare umgangen)
                     </div>
                 )}
 
@@ -267,7 +271,7 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                     type="submit"
                     className="w-full py-3 bg-[#8b1a1a] text-white font-bold rounded-xl disabled:opacity-40 hover:bg-[#6e1313] transition-colors"
                 >
-                    {isSubmitting ? "Wird gesendet..." : `Kostenpflichtig bestellen (${(getTotal() + tip).toFixed(2)} �)`}
+                    {isSubmitting ? "Wird gesendet..." : `Kostenpflichtig bestellen (${(getTotal() + tip).toFixed(2)} €)`}
                 </button>
             </form>
         </div>

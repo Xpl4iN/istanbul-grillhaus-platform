@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState, useRef } from "react";
 
 export default function AdminDashboard() {
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
             if (res.ok) {
                 setOrders(prev => prev.filter(o => o.id !== id));
             } else {
-                alert("Fehler beim L�schen.");
+                alert("Fehler beim Löschen.");
             }
         } catch (e) {
             console.error(e);
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orderId: order.id,
-                    reason: 'No-Show (Manuell �ber Dashboard blockiert)'
+                    reason: 'No-Show (Manuell über Dashboard blockiert)'
                 })
             });
 
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
                         onClick={startShift}
                         className="bg-green-500 hover:bg-green-400 text-white text-4xl font-bold py-12 px-24 rounded-3xl shadow-2xl animate-pulse transition"
                     >
-                        ?? Schicht starten & Bestell-Alarm aktivieren
+                        👆 Schicht starten & Bestell-Alarm aktivieren
                     </button>
                 </div>
             ) : (
@@ -176,10 +176,10 @@ export default function AdminDashboard() {
                                     <div>
                                         <h2 className="text-3xl font-black text-gray-900 leading-none">#{order.short_id}</h2>
                                         <p className="text-sm text-gray-600 font-medium mt-1 leading-tight">
-                                            {order.customerName} � {order.phone}
+                                            {order.customerName} • {order.phone}
                                         </p>
                                         <p className="text-red-700 font-bold text-sm mt-1 bg-red-50/80 inline-block px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
-                                            ZAHLT VOR ORT: {Number(order.total_price).toFixed(2)} �
+                                            ZAHLT VOR ORT: {Number(order.total_price).toFixed(2)} €
                                         </p>
                                         {order.dining_option && (
                                             <div className="mt-1.5">
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
                                                     ? 'bg-blue-50 border-blue-200 text-blue-800'
                                                     : 'bg-green-50 border-green-200 text-green-800'
                                                     }`}>
-                                                    {order.dining_option === 'dine-in' ? '??? Vor Ort' : '?? Mitnehmen'}
+                                                    {order.dining_option === 'dine-in' ? '🍽️ Vor Ort' : '🏠 Mitnehmen'}
                                                 </span>
                                             </div>
                                         )}
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
                                                 <span className="font-extrabold text-gray-900">{item.quantity}x {item.productName}</span>
                                                 {item.modifiers?.length > 0 && (
                                                     <span className="block text-sm text-red-600 ml-2 font-bold bg-red-50 px-2 py-0.5 rounded-md mt-0.5 border border-red-100 leading-tight inline-block">
-                                                        ? {item.modifiers.map((m: any) => m.name).join(', ')}
+                                                        ➢ {item.modifiers.map((m: any) => m.name).join(', ')}
                                                     </span>
                                                 )}
                                             </li>
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                                     )}
                                     {order.status === 'ACCEPTED' && (
                                         <button onClick={() => updateStatus(order.id, 'READY')} className="flex-1 bg-green-500 hover:bg-green-600 active:bg-green-700 active:scale-95 text-white text-lg font-bold py-3 rounded-lg transition-all shadow-sm">
-                                            ? Essen ist fertig
+                                            ✅ Essen ist fertig
                                         </button>
                                     )}
                                     {order.status === 'READY' && (
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                                     )}
                                     {order.status === 'CANCELLED' && (
                                         <button onClick={() => setDeleteModalId(order.id)} className="flex-1 bg-red-800 hover:bg-red-900 active:bg-black active:scale-95 text-white text-lg font-bold py-3 rounded-lg transition-all shadow-sm">
-                                            ??? L�schen (Erledigt)
+                                            🗑️ Löschen (Erledigt)
                                         </button>
                                     )}
 
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
                                         onClick={() => setBlacklistModalOrder(order)}
                                         className="bg-gray-100 hover:bg-red-50 active:bg-red-600 active:scale-95 text-gray-400 hover:text-red-600 hover:border-red-200 border border-transparent text-base font-bold py-3 px-2 rounded-lg transition-all w-[60px] flex items-center justify-center text-center leading-tight hover:shadow-inner"
                                     >
-                                        ??
+                                        🚨
                                     </button>
                                 </div>
                             </div>
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
 
                         {orders.length === 0 && (
                             <div className="col-span-full h-[40vh] flex flex-col items-center justify-center text-gray-400 border-4 border-dashed border-gray-200 rounded-3xl">
-                                <span className="text-6xl mb-4 opacity-50">???</span>
+                                <span className="text-6xl mb-4 opacity-50">🍽️</span>
                                 <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-400 to-gray-300">Warten auf hungrige Kunden...</p>
                             </div>
                         )}
@@ -259,12 +259,12 @@ export default function AdminDashboard() {
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                             <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border-4 border-red-100">
                                 <div className="text-center">
-                                    <span className="text-5xl mb-4 block">???</span>
-                                    <h3 className="text-2xl font-black text-gray-900 mb-2">Bon l�schen?</h3>
-                                    <p className="text-gray-600 mb-8 font-medium">Bist du sicher, dass du diesen stornierten Bon endg�ltig aus der Kasse entfernen willst?</p>
+                                    <span className="text-5xl mb-4 block">🗑️</span>
+                                    <h3 className="text-2xl font-black text-gray-900 mb-2">Bon löschen?</h3>
+                                    <p className="text-gray-600 mb-8 font-medium">Bist du sicher, dass du diesen stornierten Bon endgültig aus der Kasse entfernen willst?</p>
                                     <div className="flex gap-4">
                                         <button onClick={() => setDeleteModalId(null)} className="flex-1 py-4 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">Abbrechen</button>
-                                        <button onClick={() => { deleteOrder(deleteModalId); setDeleteModalId(null); }} className="flex-1 py-4 font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-lg shadow-red-200">Endg�ltig l�schen</button>
+                                        <button onClick={() => { deleteOrder(deleteModalId); setDeleteModalId(null); }} className="flex-1 py-4 font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-lg shadow-red-200">Endgültig löschen</button>
                                     </div>
                                 </div>
                             </div>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                             <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border-4 border-gray-900">
                                 <div className="text-center">
-                                    <span className="text-5xl mb-4 block">??</span>
+                                    <span className="text-5xl mb-4 block">🚨</span>
                                     <h3 className="text-2xl font-black text-gray-900 mb-2">Kunde blockieren?</h3>
                                     <p className="text-gray-600 mb-2 font-medium">Willst du <strong>{blacklistModalOrder.customerName}</strong> ({blacklistModalOrder.phone}) wirklich dauerhaft blockieren?</p>
                                     <p className="text-sm text-red-500 mb-8 font-bold bg-red-50 py-2 rounded-lg">Achtung: Er kann dann nicht mehr bestellen!</p>

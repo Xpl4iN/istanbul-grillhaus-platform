@@ -5,11 +5,29 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Organization {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  features     Json          @default("{}") // e.g. { "online_payments": true, "table_management": true }
+  
+  users        User[]
+  categories   Category[]
+  products     Product[]
+  orders       Order[]
+  customers    Customer[]
+  shopSettings ShopSettings[]
+  reservations Reservation[]
 }
 
 model User {
   id             String        @id
   email          String        @unique
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
   role           Role          @default(STAFF)
 }
 
@@ -22,15 +40,20 @@ enum Role {
 
 model Category {
   id             String       @id @default(cuid())
+  organizationId String
   name           String
   sort_order     Int          @default(0)
   is_active      Boolean      @default(true)
   
+  organization   Organization @relation(fields: [organizationId], references: [id])
   products       Product[]
+
+  @@index([organizationId])
 }
 
 model Product {
   id              String          @id @default(uuid())
+  organizationId  String
   category_id     String?
   name            String
   description     String?
@@ -43,9 +66,12 @@ model Product {
   additives       String?
   deposit_amount  Float?
   
+  organization    Organization    @relation(fields: [organizationId], references: [id])
   category        Category?       @relation(fields: [category_id], references: [id], onDelete: Restrict)
   modifier_groups ModifierGroup[]
   orderItems      OrderItem[]
+
+  @@index([organizationId])
 }
 
 model ModifierGroup {
@@ -72,6 +98,7 @@ model Modifier {
 
 model Order {
   id             String      @id @default(uuid())
+  organizationId String
   short_id       String      @unique
   customer_id    String
   status         String      @default("PENDING")
@@ -79,12 +106,15 @@ model Order {
   pickup_time    DateTime
   ip_address     String?
   tip_amount     Float?      @default(0)
-  dining_option  String?
   created_at     DateTime    @default(now())
   updated_at     DateTime    @default(now())
+  dining_option  String?
   
+  organization   Organization @relation(fields: [organizationId], references: [id])
   customer       Customer    @relation(fields: [customer_id], references: [id], onDelete: Restrict)
   items          OrderItem[]
+
+  @@index([organizationId])
 }
 
 model OrderItem {
@@ -111,21 +141,32 @@ model OrderItemModifier {
 
 model Customer {
   id               String       @id @default(uuid())
+  organizationId   String
   name             String
   phone_normalized String       
   created_at       DateTime     @default(now())
   
+  organization     Organization @relation(fields: [organizationId], references: [id])
   orders           Order[]
+
+  
+  @@index([organizationId])
+  @@unique([organizationId, phone_normalized])
 }
 
 model Reservation {
   id             String       @id @default(cuid())
+  organizationId String
   date           DateTime
   partySize      Int
   status         String       @default("PENDING")
   customerName   String
   customerEmail  String?
   customerPhone  String?
+  
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
 
 model Blacklist {
@@ -138,6 +179,13 @@ model Blacklist {
 
 model ShopSettings {
   id                 String       @id @default(cuid())
+  organizationId     String       @unique
   is_open_right_now  Boolean      @default(true)
   opening_hours_json String
+  
+  organization       Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
+
+

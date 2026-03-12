@@ -1,7 +1,7 @@
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-
+const ISTANBUL_ORG_ID = "cmmb6n8xu0001o7fwaw73p1lr";
 
 export async function GET(req: Request) {
     const url = new URL(req.url);
@@ -22,14 +22,14 @@ export async function GET(req: Request) {
         await prisma.category.deleteMany();
 
         // Kategorien
-        const catDoener = await prisma.category.create({ data: { name: "Döner & Dürüm", sort_order: 10 } });
-        const catPide = await prisma.category.create({ data: { name: "Pide & Lahmacun", sort_order: 20 } });
-        const catTeller = await prisma.category.create({ data: { name: "Tellerportionen", sort_order: 30 } });
-        const catBox = await prisma.category.create({ data: { name: "Döner Boxen", sort_order: 40 } });
-        const catPizza = await prisma.category.create({ data: { name: "Pizza (ø 32cm)", sort_order: 50 } });
-        const catSalad = await prisma.category.create({ data: { name: "Salat", sort_order: 60 } });
-        const catBeilagen = await prisma.category.create({ data: { name: "Beilagen", sort_order: 70 } });
-        const catDrinks = await prisma.category.create({ data: { name: "Getränke", sort_order: 80 } });
+        const catDoener = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Döner & Dürüm", sort_order: 10 } });
+        const catPide = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Pide & Lahmacun", sort_order: 20 } });
+        const catTeller = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Tellerportionen", sort_order: 30 } });
+        const catBox = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Döner Boxen", sort_order: 40 } });
+        const catPizza = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Pizza (ø 32cm)", sort_order: 50 } });
+        const catSalad = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Salat", sort_order: 60 } });
+        const catBeilagen = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Beilagen", sort_order: 70 } });
+        const catDrinks = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Getränke", sort_order: 80 } });
 
         // Modifier Templates
         const fleischOptionen = [
@@ -87,7 +87,7 @@ export async function GET(req: Request) {
         ) => {
             const product = await prisma.product.create({
                 data: {
-
+                    organizationId: ISTANBUL_ORG_ID,
                     category_id: categoryId,
                     name,
                     description,
@@ -206,14 +206,13 @@ export async function GET(req: Request) {
         };
 
         await prisma.shopSettings.upsert({
-            where: {
-                id: "1"
-            },
+            where: { organizationId: "cmmb6n8xu0001o7fwaw73p1lr" },
             update: {
                 is_open_right_now: true,
                 opening_hours_json: JSON.stringify(openingHours)
             },
             create: {
+                organizationId: ISTANBUL_ORG_ID, 
                 id: "1",
                 is_open_right_now: true,
                 opening_hours_json: JSON.stringify(openingHours)

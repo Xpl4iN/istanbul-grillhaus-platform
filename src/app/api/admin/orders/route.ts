@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
     try {
         const orders = await prisma.order.findMany({
-            where: {
+            where: { 
                 created_at: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
                 status: { not: "DELETED" }
             },
@@ -24,7 +24,7 @@ export async function GET() {
         });
 
         // Map to client expected format
-        const mappedOrders = orders.map((o: any) => ({
+        const mappedOrders = orders.map(o => ({
             id: o.id,
             short_id: o.short_id,
             customerName: o.customer.name,
@@ -33,10 +33,10 @@ export async function GET() {
             pickup_time: new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }).format(new Date(o.pickup_time)),
             status: o.status,
             dining_option: o.dining_option ?? null,
-            items: o.items.map((i: any) => ({
+            items: o.items.map(i => ({
                 quantity: i.quantity,
                 productName: i.product.name,
-                modifiers: i.modifiers.map((m: any) => ({ name: m.modifier.name }))
+                modifiers: i.modifiers.map(m => ({ name: m.modifier.name }))
             }))
         }));
 

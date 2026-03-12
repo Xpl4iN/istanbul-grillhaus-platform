@@ -31,16 +31,14 @@ export async function GET(req: Request) {
             }
         });
 
-        return NextResponse.json({
-            orders: orders.map((o: any) => ({
-                short_id: o.short_id,
-                status: o.status,
-                total_price: o.total_price,
-                pickup_time: o.pickup_time,
-                created_at: o.created_at,
-                items: o.items.map((i: any) => ({ quantity: i.quantity, name: i.product.name }))
-            }))
-        });
+        return NextResponse.json({ orders: orders.map(o => ({
+            short_id: o.short_id,
+            status: o.status,
+            total_price: o.total_price,
+            pickup_time: o.pickup_time,
+            created_at: o.created_at,
+            items: o.items.map(i => ({ quantity: i.quantity, name: i.product.name }))
+        })) });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

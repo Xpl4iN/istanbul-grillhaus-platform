@@ -20,7 +20,7 @@ import { parsePhoneNumberWithError } from "libphonenumber-js";
 import crypto from "crypto";
 import { pushOrderEvent } from "../admin/stream/route";
 
-
+const ISTANBUL_ORG_ID = "cmmb6n8xu0001o7fwaw73p1lr";
 
 const generateShortId = () => {
     const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -73,25 +73,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Bestellung online nicht möglich. Bitte rufe direkt im Laden an." }, { status: 403 });
         }
 
-        let dbCustomer = await prisma.customer.findFirst({
-            where: { phone_normalized: phoneNormalized }
+        const dbCustomer = await prisma.customer.upsert({
+            where: { organizationId_phone_normalized: { organizationId: ISTANBUL_ORG_ID, phone_normalized: phoneNormalized } },
+            update: { name: customer.name },
+            create: { name: customer.name, phone_normalized: phoneNormalized, organizationId: ISTANBUL_ORG_ID }
         });
-
-        if (!dbCustomer) {
-            dbCustomer = await prisma.customer.create({
-                data: { name: customer.name, phone_normalized: phoneNormalized }
-            });
-        } else {
-            dbCustomer = await prisma.customer.update({
-                where: { id: dbCustomer.id },
-                data: { name: customer.name }
-            });
-        }
 
         const shortId = generateShortId();
 
         const order = await prisma.order.create({
             data: {
+                organizationId: ISTANBUL_ORG_ID,
                 short_id: shortId,
                 customer_id: dbCustomer.id,
                 total_price,

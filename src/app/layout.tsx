@@ -4,14 +4,17 @@ import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-inter"});
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Istanbul Grillhaus – Online Bestellen",
-  description: "Döner, Pizza & mehr online bestellen bei Istanbul Grillhaus in Weilheim. 100% Halal."};
+  description: "Döner, Pizza & mehr online bestellen bei Istanbul Grillhaus in Weilheim. 100% Halal.",
+};
 
 export default function RootLayout({
-  children}: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
