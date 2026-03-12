@@ -1,0 +1,70 @@
+import { create } from 'zustand';
+
+export type Modifier = {
+    id: string;
+    name: string;
+    price_delta: number;
+};
+
+export type ModifierGroup = {
+    id: string;
+    name: string;
+    is_required: boolean;
+    max_selections: number;
+    modifiers: Modifier[];
+};
+
+export type Product = {
+    id: string;
+    name: string;
+    description: string;
+    base_price: number;
+    modifier_groups: ModifierGroup[];
+    category?: { name: string; sort_order: number };
+    allergens?: string | null;
+    additives?: string | null;
+    deposit_amount?: number | null;
+};
+
+export type CartItem = {
+    id: string;
+    product: Product;
+    product_id: string;
+    quantity: number;
+    price: number;
+    modifiers: Record<string, string[]>; // { groupId: [modifierId, ...] }
+};
+
+export type DiningOption = 'takeaway' | 'dine-in' | null;
+
+interface CartState {
+    items: CartItem[];
+    addItem: (item: Omit<CartItem, 'id'>) => void;
+    removeItem: (id: string) => void;
+    clearCart: () => void;
+    getTotal: () => number;
+    isTestMode: boolean;
+    toggleTestMode: () => void;
+    diningOption: DiningOption;
+    setDiningOption: (option: DiningOption) => void;
+}
+
+export const useCartStore = create<CartState>((set, get) => ({
+    items: [],
+    isTestMode: false,
+    diningOption: null,
+    toggleTestMode: () => set((state) => ({ isTestMode: !state.isTestMode })),
+    setDiningOption: (option) => set({ diningOption: option }),
+    addItem: (item) => {
+        set((state) => ({
+            items: [...state.items, { ...item, id: Math.random().toString(36).substring(7) }]
+        }));
+    },
+    removeItem: (id) => {
+        set((state) => ({ items: state.items.filter(i => i.id !== id) }));
+    },
+    clearCart: () => set({ items: [], diningOption: null }),
+    getTotal: () => {
+        return get().items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    }
+}));

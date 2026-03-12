@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  /* Base colors */
+  --bg-main: #f5f0e8;
+  /* Cream */
+  --bg-card: #fffdf9;
+  /* Soft off‑white */
+  --text-primary: #1a1008;
+  /* Dark brown */
+  --text-secondary: #5c4a32;
+  /* Muted brown */
+
+  /* Accent palette */
+  --accent-red: #8b1a1a;
+  /* Deep crimson */
+  --accent-gold: #b8860b;
+  /* Dark gold */
+  --accent-green: #096a50;
+  /* Traditional green */
+  --accent-purple: #6b2d5c;
+  /* Ottoman purple */
+  --accent-blue: #2a5d9f;
+  /* Rich blue */
+
+  /* Border and shadow tones */
+  --border-warm: #ddd0b8;
+  /* Warm border */
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+
+  background: var(--bg-main);
+  background-image:
+    radial-gradient(ellipse at top, #ede5d0 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8b89a' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  color: var(--text-primary);
+  font-family: var(--font-inter), 'Inter', sans-serif;
+  min-height: 100vh;
+}
