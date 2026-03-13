@@ -110,7 +110,7 @@ export default function OrderTracker() {
         );
     }
 
-    const timeString = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" }).format(new Date(order.pickup_time));
+    const timeString = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit" }).format(new Date(order.pickup_time));
     const statusStyle = getStatusColorWrapper(order.status);
 
     return (

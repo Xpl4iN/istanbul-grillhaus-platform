@@ -94,7 +94,7 @@ export default function OrderHistory() {
                                     </span>
                                 </div>
                                 <p className="text-xs mt-1 opacity-60">
-                                    {new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" }).format(new Date(o.created_at))} · {o.total_price.toFixed(2)} €
+                                    {new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(o.created_at))} · {o.total_price.toFixed(2)} €
                                 </p>
                                 <p className="text-xs mt-1" style={{ color: "#5c4a32" }}>
                                     {o.items.map((i: any) => `${i.quantity}x ${i.name}`).join(", ")}
