@@ -77,7 +77,7 @@ export default async function Home() {
   const { products, isOpen, openingHours, features } = await getMenuData();
   
   return (
-    <main className="min-h-screen bg-gray-50/50">
+    <main className="min-h-screen">
       <TestModeToggle />
       <OrderTracker />
       <Menu 
