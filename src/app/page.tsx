@@ -35,6 +35,12 @@ const getMenuData = unstable_cache(
             where: { id: ISTANBUL_SETTINGS_ID }
         });
 
+        const org = await prisma.organization.findUnique({
+            where: { id: ISTANBUL_ORG_ID },
+            select: { features: true }
+        });
+        const features = (typeof org?.features === 'object' && org?.features !== null) ? org.features : {};
+
         let isOpen = false;
         let openingHours = null;
 
@@ -59,7 +65,8 @@ const getMenuData = unstable_cache(
         return {
             products: products.sort((a, b) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
             isOpen,
-            openingHours
+            openingHours,
+            features
         };
     },
     ['menu-data-ssr'],
@@ -67,7 +74,7 @@ const getMenuData = unstable_cache(
 );
 
 export default async function Home() {
-  const { products, isOpen, openingHours } = await getMenuData();
+  const { products, isOpen, openingHours, features } = await getMenuData();
   
   return (
     <main className="min-h-screen bg-gray-50/50">
@@ -77,6 +84,7 @@ export default async function Home() {
         initialProducts={products as any} 
         initialIsOpen={isOpen} 
         openingHours={openingHours}
+        features={features}
       />
     </main>
   );

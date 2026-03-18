@@ -76,7 +76,7 @@ const isStoreOpen = (hours: any) => {
     return currentTimeStr >= todayHours.open && currentTimeStr <= todayHours.close;
 };
 
-export default function Menu({ initialProducts = [], initialIsOpen = true, openingHours = null }: { initialProducts?: Product[], initialIsOpen?: boolean, openingHours?: any }) {
+export default function Menu({ initialProducts = [], initialIsOpen = true, openingHours = null, features = {} }: { initialProducts?: Product[], initialIsOpen?: boolean, openingHours?: any, features?: any }) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [showCheckout, setShowCheckout] = useState(false);
@@ -250,7 +250,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         </div>
                     </div>
                     {items.length > 0 && (
-                        isCurrentlyOpen ? <Checkout onComplete={() => setShowCheckout(false)} /> : (
+                        isCurrentlyOpen ? <Checkout onComplete={() => setShowCheckout(false)} features={features} /> : (
                             <div className="rounded-xl p-5 text-center border font-semibold"
                                 style={{ background: "#fdf0f0", borderColor: "#e8b4b4", color: "#7a1a1a" }}>
                                 🕒 Aktuell geschlossen.
