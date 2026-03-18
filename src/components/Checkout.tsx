@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useMemo, useEffect } from "react";
 import Script from "next/script";
 import { useCartStore } from "@/store/cartStore";
@@ -37,7 +37,7 @@ const DiningTile = ({
     </button>
 );
 
-export default function Checkout({ onComplete }: { onComplete: () => void }) {
+export default function Checkout({ onComplete, features = {} }: { onComplete: () => void, features?: any }) {
     const { items, getTotal, clearCart, isTestMode, diningOption, setDiningOption } = useCartStore();
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
@@ -46,6 +46,17 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
     const [turnstileToken, setTurnstileToken] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [tip, setTip] = useState(0);
+
+    const allowPickup = features.allowPickup ?? true;
+    const allowDineIn = features.allowDineIn ?? false;
+    
+    // Automatically select an option if only one is available and none provided yet
+    useEffect(() => {
+        if (!diningOption) {
+            if (allowPickup && !allowDineIn) setDiningOption("takeaway");
+            else if (allowDineIn && !allowPickup) setDiningOption("dine-in");
+        }
+    }, [diningOption, allowPickup, allowDineIn, setDiningOption]);
 
     useEffect(() => {
         if (isTestMode) {
@@ -170,32 +181,48 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
 
     return (
         <div className="bg-[#fffdf9] p-6 rounded-2xl shadow-xl space-y-5 border border-[#ddd0b8]">
+            {features.maintenanceMode ? (
+                <div className="p-4 bg-orange-50 border-orange-200 border rounded-xl text-center">
+                    <h3 className="font-bold text-orange-800 text-lg mb-2">Vorübergehend pausiert</h3>
+                    <p className="text-sm text-orange-900">
+                        Wir erhalten gerade sehr viele Bestellungen und müssen kurz pausieren. 
+                        Bitte versuchen Sie es in ein paar Minuten nochmal.
+                    </p>
+                </div>
+            ) : (
+                <>
             <h2 className="text-xl font-bold text-[#1a1008]">Checkout</h2>
             <form onSubmit={handleOrder} className="space-y-5">
 
                 {/* Dining Option Tiles */}
-                <div>
-                    <label className="block text-sm font-semibold text-[#1a1008] mb-2">
-                        Wie möchten Sie essen?
-                        <span className="text-[#8b1a1a] ml-1">*</span>
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                        <DiningTile
-                            icon="🏠"
-                            label="Mitnehmen"
-                            sublabel="Zum Mitnehmen verpackt"
-                            selected={diningOption === "takeaway"}
-                            onClick={() => setDiningOption("takeaway")}
-                        />
-                        <DiningTile
-                            icon="🍽️"
-                            label="Vor Ort"
-                            sublabel="Im Restaurant essen"
-                            selected={diningOption === "dine-in"}
-                            onClick={() => setDiningOption("dine-in")}
-                        />
+                {(allowPickup || allowDineIn) && (
+                    <div>
+                        <label className="block text-sm font-semibold text-[#1a1008] mb-2">
+                            Wie möchten Sie essen?
+                            <span className="text-[#8b1a1a] ml-1">*</span>
+                        </label>
+                        <div className={`grid gap-3 ${allowPickup && allowDineIn ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                            {allowPickup && (
+                                <DiningTile
+                                    icon="🏠"
+                                    label="Mitnehmen"
+                                    sublabel="Zum Mitnehmen verpackt"
+                                    selected={diningOption === "takeaway"}
+                                    onClick={() => setDiningOption("takeaway")}
+                                />
+                            )}
+                            {allowDineIn && (
+                                <DiningTile
+                                    icon="🍽️"
+                                    label="Vor Ort"
+                                    sublabel="Im Restaurant essen"
+                                    selected={diningOption === "dine-in"}
+                                    onClick={() => setDiningOption("dine-in")}
+                                />
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div>
                     <label className="block text-sm font-medium text-[#1a1008]">Vorname</label>
@@ -274,6 +301,8 @@ export default function Checkout({ onComplete }: { onComplete: () => void }) {
                     {isSubmitting ? "Wird gesendet..." : `Kostenpflichtig bestellen (${(getTotal() + tip).toFixed(2)} €)`}
                 </button>
             </form>
+            </>
+            )}
         </div>
     );
 }
