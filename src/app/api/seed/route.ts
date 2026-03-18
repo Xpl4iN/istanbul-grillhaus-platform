@@ -21,6 +21,13 @@ export async function GET(req: Request) {
         await prisma.product.deleteMany();
         await prisma.category.deleteMany();
 
+        // Ensure Organization exists
+        await prisma.organization.upsert({
+            where: { id: ISTANBUL_ORG_ID },
+            update: { name: "Istanbul Grillhaus", slug: "istanbul-grillhaus" },
+            create: { id: ISTANBUL_ORG_ID, name: "Istanbul Grillhaus", slug: "istanbul-grillhaus" }
+        });
+
         // Kategorien
         const catDoener = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Döner & Dürüm", sort_order: 10 } });
         const catPide = await prisma.category.create({ data: { organizationId: ISTANBUL_ORG_ID, name: "Pide & Lahmacun", sort_order: 20 } });
