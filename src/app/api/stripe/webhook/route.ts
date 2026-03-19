@@ -3,8 +3,8 @@ import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/db';
 import { pushOrderEvent } from '../../admin/stream/route';
 
-// Disable Next.js body parsing so we can verify the raw body with Stripe
-export const config = { api: { bodyParser: false } };
+// Next.js handles raw body parsing automatically with req.text() or req.arrayBuffer()
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     const body = await req.text();
