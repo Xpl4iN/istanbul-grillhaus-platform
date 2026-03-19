@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useCartStore } from "@/store/cartStore";
 
@@ -39,6 +40,7 @@ const DiningTile = ({
 
 export default function Checkout({ onComplete, features = {} }: { onComplete: () => void, features?: any }) {
     const { items, getTotal, clearCart, isTestMode, diningOption, setDiningOption } = useCartStore();
+    const router = useRouter();
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [time, setTime] = useState("");
@@ -46,6 +48,7 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
     const [turnstileToken, setTurnstileToken] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [tip, setTip] = useState(0);
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'stripe'>('cash');
 
     const allowPickup = features.allowPickup ?? true;
     const allowDineIn = features.allowDineIn ?? false;
@@ -126,7 +129,7 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
             return;
         }
         if (!turnstileToken && !isTestMode) {
-            alert("Bitte bestästigen Sie, dass Sie ein Mensch sind.");
+            alert("Bitte bestätigen Sie, dass Sie ein Mensch sind.");
             return;
         }
 
@@ -146,32 +149,49 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
             finalPickupTime = time;
         }
 
+        const orderPayload = {
+            items,
+            customer: { name, phone },
+            pickup_time: finalPickupTime,
+            total_price: getTotal() + tip,
+            tip_amount: tip,
+            dining_option: diningOption,
+            turnstile_token: isTestMode ? "mock-token-for-dev" : turnstileToken,
+        };
+
         setIsSubmitting(true);
         try {
-            const res = await fetch("/api/orders", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    items,
-                    customer: { name, phone },
-                    pickup_time: finalPickupTime,
-                    total_price: getTotal() + tip,
-                    tip_amount: tip,
-                    dining_option: diningOption,
-                    turnstile_token: isTestMode ? "mock-token-for-dev" : turnstileToken,
-                }),
-            });
-
-            const data = await res.json();
-            if (!res.ok) {
-                alert("Error: " + data.error + (data.details ? "\nDetails: " + data.details : ""));
-                return;
+            if (paymentMethod === 'stripe') {
+                // --- Stripe online payment ---
+                const res = await fetch("/api/stripe/create-checkout-session", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderPayload),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert("Stripe-Fehler: " + data.error);
+                    return;
+                }
+                // Redirect to Stripe Checkout – cart will be cleared on success page
+                window.location.href = data.url;
+            } else {
+                // --- Pay at pickup (existing flow) ---
+                const res = await fetch("/api/orders", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderPayload),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert("Error: " + data.error + (data.details ? "\nDetails: " + data.details : ""));
+                    return;
+                }
+                window.dispatchEvent(new Event("orderPlaced"));
+                clearCart();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                onComplete();
             }
-
-            window.dispatchEvent(new Event("orderPlaced"));
-            clearCart();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-            onComplete();
         } catch (e) {
             alert("Fehler bei der Bestellung.");
         } finally {
@@ -289,8 +309,56 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                     </div>
                 )}
 
-                <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded-xl border border-blue-100">
-                    Hinweis: Zahlung erfolgt in bar oder per Karte bei Abholung.
+                {/* Payment Method Selector */}
+                <div>
+                    <label className="block text-sm font-semibold text-[#1a1008] mb-2">
+                        Zahlungsart
+                        <span className="text-[#8b1a1a] ml-1">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setPaymentMethod('cash')}
+                            className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center ${
+                                paymentMethod === 'cash'
+                                    ? 'border-[#8b1a1a] bg-[#8b1a1a] text-white shadow-lg scale-[1.03]'
+                                    : 'border-[#ddd0b8] bg-[#fffdf9] text-[#1a1008] hover:border-[#8b1a1a] hover:bg-[#fdf5ee]'
+                            }`}
+                        >
+                            {paymentMethod === 'cash' && (
+                                <span className="absolute top-2 right-2 text-xs bg-white/20 rounded-full px-1.5 py-0.5 font-bold">✓</span>
+                            )}
+                            <span className="text-2xl">💵</span>
+                            <span className="font-bold text-sm">Bar / Karte</span>
+                            <span className={`text-xs ${paymentMethod === 'cash' ? 'text-white/80' : 'text-[#5c4a32]'}`}>Bei Abholung</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setPaymentMethod('stripe')}
+                            className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center ${
+                                paymentMethod === 'stripe'
+                                    ? 'border-[#8b1a1a] bg-[#8b1a1a] text-white shadow-lg scale-[1.03]'
+                                    : 'border-[#ddd0b8] bg-[#fffdf9] text-[#1a1008] hover:border-[#8b1a1a] hover:bg-[#fdf5ee]'
+                            }`}
+                        >
+                            {paymentMethod === 'stripe' && (
+                                <span className="absolute top-2 right-2 text-xs bg-white/20 rounded-full px-1.5 py-0.5 font-bold">✓</span>
+                            )}
+                            <span className="text-2xl">💳</span>
+                            <span className="font-bold text-sm">Online zahlen</span>
+                            <span className={`text-xs ${paymentMethod === 'stripe' ? 'text-white/80' : 'text-[#5c4a32]'}`}>Karte / PayPal</span>
+                        </button>
+                    </div>
+                    {paymentMethod === 'stripe' && (
+                        <p className="mt-2 text-xs text-[#5c4a32] bg-[#fdf5ee] border border-[#ddd0b8] rounded-xl p-2 text-center">
+                            🔒 Sichere Zahlung via Stripe · Du wirst zur Checkout-Seite weitergeleitet
+                        </p>
+                    )}
+                    {paymentMethod === 'cash' && (
+                        <p className="mt-2 text-xs text-[#5c4a32] bg-blue-50 border border-blue-100 rounded-xl p-2 text-center">
+                            💵 Zahlung erfolgt in bar oder per Karte bei Abholung
+                        </p>
+                    )}
                 </div>
 
                 <button
@@ -298,7 +366,12 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                     type="submit"
                     className="w-full py-3 bg-[#8b1a1a] text-white font-bold rounded-xl disabled:opacity-40 hover:bg-[#6e1313] transition-colors"
                 >
-                    {isSubmitting ? "Wird gesendet..." : `Kostenpflichtig bestellen (${(getTotal() + tip).toFixed(2)} €)`}
+                    {isSubmitting
+                        ? (paymentMethod === 'stripe' ? 'Weiterleitung zu Stripe...' : 'Wird gesendet...')
+                        : paymentMethod === 'stripe'
+                            ? `Jetzt online bezahlen (${(getTotal() + tip).toFixed(2)} €) →`
+                            : `Kostenpflichtig bestellen (${(getTotal() + tip).toFixed(2)} €)`
+                    }
                 </button>
             </form>
             </>

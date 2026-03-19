@@ -182,7 +182,13 @@ export default function OrderTracker() {
 
             <div className="mt-4 pt-4 border-t" style={{ borderColor: "#ddd0b8" }}>
                 <p className="text-right font-medium text-sm" style={{ color: "#5c4a32" }}>Summe: <span className="text-xl font-bold ml-2" style={{ color: "#8b1a1a" }}>{order.total_price.toFixed(2)} €</span></p>
-                <p className="text-right text-[10px] mt-1" style={{ color: "#5c4a32" }}>Zahlung vor Ort (Bar / Karte)</p>
+                <p className="text-right text-[10px] mt-1" style={{ color: "#5c4a32" }}>
+                    {order.payment_method === 'stripe' ? (
+                        <span className="font-bold text-green-700">Online bezahlt ✅ (Stripe)</span>
+                    ) : (
+                        "Zahlung vor Ort (Bar / Karte)"
+                    )}
+                </p>
             </div>
 
             {showCancelModal && (
