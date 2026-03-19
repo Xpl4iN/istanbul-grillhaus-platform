@@ -7,11 +7,28 @@ import { pushOrderEvent } from '../../admin/stream/route';
 const ISTANBUL_ORG_ID = 'cmmb6n8xu0001o7fwaw73p1lr';
 const DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
 
-const generateShortId = () => {
-    const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-    const randomNumber = Math.floor(10 + Math.random() * 90);
-    return `${randomLetter}-${randomNumber}`;
+const generateShortId = async (dining_option: string) => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // Find the last order of today to determine the next short_id
+    const lastOrder = await prisma.order.findFirst({
+        where: { created_at: { gte: todayStart } },
+        orderBy: { created_at: 'desc' },
+        select: { short_id: true }
+    });
+
+    let nextNumber = 1;
+    if (lastOrder && lastOrder.short_id) {
+        // Extract number from "D-15" using regex
+        const match = lastOrder.short_id.match(/\d+/);
+        if (match) {
+            nextNumber = parseInt(match[0]) + 1;
+        }
+    }
+
+    const prefix = dining_option === 'dine-in' ? 'V' : 'A';
+    return `${prefix}-${nextNumber}`;
 };
 
 export async function POST(req: Request) {
@@ -58,7 +75,7 @@ export async function POST(req: Request) {
             create: { name: customer.name, phone_normalized: phoneNormalized, organizationId: ISTANBUL_ORG_ID },
         });
 
-        const shortId = generateShortId();
+        const shortId = await generateShortId(dining_option || 'pickup');
 
         // Create order with payment_status = PENDING
         const order = await prisma.order.create({
