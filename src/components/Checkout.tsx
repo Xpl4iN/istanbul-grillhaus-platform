@@ -61,17 +61,6 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
         }
     }, [diningOption, allowPickup, allowDineIn, setDiningOption]);
 
-    const allowPickup = features.allowPickup ?? true;
-    const allowDineIn = features.allowDineIn ?? false;
-    
-    // Automatically select an option if only one is available and none provided yet
-    useEffect(() => {
-        if (!diningOption) {
-            if (allowPickup && !allowDineIn) setDiningOption("takeaway");
-            else if (allowDineIn && !allowPickup) setDiningOption("dine-in");
-        }
-    }, [diningOption, allowPickup, allowDineIn, setDiningOption]);
-
     useEffect(() => {
         if (isTestMode) {
             setName("Testuser");
