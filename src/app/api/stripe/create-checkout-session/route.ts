@@ -5,7 +5,6 @@ import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { pushOrderEvent } from '../../admin/stream/route';
 
 const ISTANBUL_ORG_ID = 'cmmb6n8xu0001o7fwaw73p1lr';
-const DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
 
 const generateShortId = async (dining_option: string) => {
     const todayStart = new Date();
@@ -35,6 +34,11 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { customer, items, pickup_time, total_price, tip_amount, dining_option, turnstile_token } = body;
+
+        // Determine base URL dynamically (helps with Vercel previews/production vs local)
+        const origin = req.headers.get('origin');
+        const host = req.headers.get('host');
+        const DOMAIN = origin || (host ? `https://${host}` : process.env.DOMAIN) || 'http://localhost:3000';
 
         // Validate Turnstile token in production
         if (process.env.NODE_ENV === 'production' && turnstile_token !== 'mock-token-for-dev') {
