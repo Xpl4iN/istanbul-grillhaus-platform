@@ -82,7 +82,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     const [showCheckout, setShowCheckout] = useState(false);
     const [isOpen, setIsOpen] = useState(initialIsOpen);
     const [showLMIVModal, setShowLMIVModal] = useState(false);
-    const { items, getTotal, removeItem, isTestMode } = useCartStore();
+    const { items, getTotal, removeItem, setItemQuantity, isTestMode } = useCartStore();
 
     // Update isOpen state based on actual business hours
     useEffect(() => {
@@ -235,6 +235,22 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                             )}
                                         </div>
                                         <div className="flex gap-3 items-center">
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => setItemQuantity(item.id, item.quantity - 1)}
+                                                    className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
+                                                    style={{ background: "#f6efe3", color: "#5c4a32" }}
+                                                >
+                                                    −
+                                                </button>
+                                                <button
+                                                    onClick={() => setItemQuantity(item.id, item.quantity + 1)}
+                                                    className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
+                                                    style={{ background: "#f6efe3", color: "#5c4a32" }}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
                                             <span className="font-bold text-sm">{(item.price * item.quantity).toFixed(2)} €</span>
                                             <button onClick={() => removeItem(item.id)}
                                                 className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
@@ -380,4 +396,3 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
         </div>
     );
 }
-

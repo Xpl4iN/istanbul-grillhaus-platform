@@ -11,6 +11,8 @@ export default function AdminDashboard() {
     const [isConnected, setIsConnected] = useState(true);
     const prevOrdersRef = useRef<any[]>([]);
     const isAudioEnabledRef = useRef(false);
+    const pendingStatusRef = useRef<Record<string, string>>({});
+    const updatingOrderIdsRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         const fetchInitial = async () => {
@@ -40,8 +42,19 @@ export default function AdminDashboard() {
                     }
                 }
 
-                prevOrdersRef.current = fetchedOrders;
-                setOrders(fetchedOrders);
+                const mergedOrders = fetchedOrders.map((order: any) => {
+                    const pendingStatus = pendingStatusRef.current[order.id];
+                    if (pendingStatus && order.status !== pendingStatus) {
+                        return { ...order, status: pendingStatus };
+                    }
+                    if (pendingStatus && order.status === pendingStatus) {
+                        delete pendingStatusRef.current[order.id];
+                    }
+                    return order;
+                });
+
+                prevOrdersRef.current = mergedOrders;
+                setOrders(mergedOrders);
             } catch (e) { console.error("Poll Error:", e); }
         };
         fetchInitial();
@@ -105,12 +118,40 @@ export default function AdminDashboard() {
     };
 
     const updateStatus = async (id: string, newStatus: string) => {
-        await fetch(`/api/admin/orders/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-        });
+        if (updatingOrderIdsRef.current.has(id)) {
+            return;
+        }
+        updatingOrderIdsRef.current.add(id);
+        const previousStatus = prevOrdersRef.current.find((o: any) => o.id === id)?.status;
+        const rollbackStatus = () => {
+            delete pendingStatusRef.current[id];
+            if (!previousStatus) return;
+            setOrders(prev => prev.map(o => o.id === id ? { ...o, status: previousStatus } : o));
+            prevOrdersRef.current = prevOrdersRef.current.map((o: any) => o.id === id ? { ...o, status: previousStatus } : o);
+        };
+        pendingStatusRef.current[id] = newStatus;
         setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+        prevOrdersRef.current = prevOrdersRef.current.map((o: any) => o.id === id ? { ...o, status: newStatus } : o);
+        let hasError = false;
+        try {
+            const res = await fetch(`/api/admin/orders/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (!res.ok) {
+                rollbackStatus();
+                hasError = true;
+            }
+        } catch {
+            rollbackStatus();
+            hasError = true;
+        } finally {
+            updatingOrderIdsRef.current.delete(id);
+            if (hasError) {
+                alert(`Fehler beim Status-Update für Bestellung ${id}. Bitte erneut versuchen.`);
+            }
+        }
     };
 
     const handleBlacklist = async (order: any) => {
@@ -292,4 +333,3 @@ export default function AdminDashboard() {
         </>
     );
 }
-
