@@ -33,7 +33,7 @@ export default function RootLayout({
                   }
                   
                   // TEA QR Scan Tracker (Beacon API POST)
-                  const teaUrl = "https://tea.xyourp.com/api/qr/track/69a2c008faf8b7b90f74516e";
+                  const teaUrl = "https://tea.xyourp.de/api/qr/track/69a2c008faf8b7b90f74516e";
                   if (navigator.sendBeacon) {
                     navigator.sendBeacon(teaUrl);
                   } else {
