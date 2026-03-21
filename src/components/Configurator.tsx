@@ -16,9 +16,9 @@ function ProductSuperscript({ allergens, additives }: { allergens?: string | nul
     );
 }
 
-export default function Configurator({ product, onClose }: { product: Product, onClose: () => void }) {
-    const { addItem, items } = useCartStore();
-    const [selectedMods, setSelectedMods] = useState<Record<string, string[]>>({});
+export default function Configurator({ product, onClose, editCartItemId, initialModifiers, hideDrinkUpsell }: { product: Product, onClose: () => void, editCartItemId?: string, initialModifiers?: Record<string, string[]>, hideDrinkUpsell?: boolean }) {
+    const { addItem, updateItem, items } = useCartStore();
+    const [selectedMods, setSelectedMods] = useState<Record<string, string[]>>(initialModifiers || {});
 
     const filteredModifierGroups = useMemo(() => {
         const hasDrinkInCart = items.some(item => 
@@ -29,14 +29,14 @@ export default function Configurator({ product, onClose }: { product: Product, o
         );
 
         return (product.modifier_groups || []).filter(group => {
-            if (group.name === 'Möchten Sie ein Getränk dazu?' && hasDrinkInCart) {
+            if (group.name === 'Möchten Sie ein Getränk dazu?' && (hasDrinkInCart || hideDrinkUpsell)) {
                 return false;
             }
             return true;
         });
-    }, [product.modifier_groups, items]);
+    }, [product.modifier_groups, items, hideDrinkUpsell]);
 
-    const modifierGroups = product.modifier_groups || [];
+    const modifierGroups = filteredModifierGroups;
 
 
     const currentTotal = useMemo(() => {
@@ -73,13 +73,17 @@ export default function Configurator({ product, onClose }: { product: Product, o
     };
 
     const handleAddToCart = () => {
-        addItem({
-            product,
-            product_id: product.id,
-            quantity: 1,
-            price: currentTotal,
-            modifiers: selectedMods
-        });
+        if (editCartItemId) {
+            updateItem(editCartItemId, selectedMods, currentTotal);
+        } else {
+            addItem({
+                product,
+                product_id: product.id,
+                quantity: 1,
+                price: currentTotal,
+                modifiers: selectedMods
+            });
+        }
         onClose();
     };
 
@@ -171,7 +175,7 @@ export default function Configurator({ product, onClose }: { product: Product, o
                             }
                         `}
                     >
-                        <span>{isValid ? 'In den Warenkorb' : 'Auswahl vervollständigt'}</span>
+                        <span>{isValid ? (editCartItemId ? 'Änderungen speichern' : 'In den Warenkorb') : 'Auswahl vervollständigt'}</span>
                         <span className="text-lg">{currentTotal.toFixed(2)} €</span>
                     </button>
                 </div>

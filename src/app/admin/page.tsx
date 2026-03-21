@@ -205,18 +205,18 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                         {orders.filter(o => !['COMPLETED', 'NO_SHOW', 'DELETED'].includes(o.status)).map(order => (
-                            <div key={order.id} className={`rounded-xl shadow-lg border-l-8 p-4 flex flex-col gap-2 relative overflow-hidden ${order.status === "CANCELLED" ? "bg-red-50 border-red-600 opacity-90" : "bg-white border-yellow-400"}`}>
+                            <div key={order.id} className={`rounded-xl shadow-lg border-l-8 p-4 flex flex-col gap-2 relative ${order.status === "CANCELLED" ? "bg-red-50 border-red-600 opacity-90" : "bg-white border-yellow-400"}`}>
 
-                                {order.status === 'READY' && <div className="absolute top-0 right-0 bg-green-500 text-white font-bold px-4 py-1 rounded-bl-xl text-sm shadow-sm z-10">ABHOLBEREIT</div>}
-                                {order.status === 'ACCEPTED' && <div className="absolute top-0 right-0 bg-blue-500 text-white font-bold px-4 py-1 rounded-bl-xl text-sm shadow-sm z-10">IN ZUBEREITUNG</div>}
-                                {order.status === 'PENDING' && <div className="absolute top-0 right-0 bg-yellow-500 text-white font-bold px-4 py-1 rounded-bl-xl text-sm shadow-sm z-10">NEU</div>}
+                                {order.status === 'READY' && <div className="absolute top-0 right-0 bg-green-500 text-white font-bold px-3 py-1 rounded-bl-xl text-xs shadow-sm z-10">ABHOLBEREIT</div>}
+                                {order.status === 'ACCEPTED' && <div className="absolute top-0 right-0 bg-blue-500 text-white font-bold px-3 py-1 rounded-bl-xl text-xs shadow-sm z-10">IN ZUBEREITUNG</div>}
+                                {order.status === 'PENDING' && <div className="absolute top-0 right-0 bg-yellow-500 text-white font-bold px-3 py-1 rounded-bl-xl text-xs shadow-sm z-10">NEU</div>}
 
-                                <div className="flex justify-between items-start pt-2">
-                                    <div>
+                                <div className="flex justify-between items-start pt-6 gap-2">
+                                    <div className="min-w-0 flex-1">
                                         <h2 className="text-3xl font-black text-gray-900 leading-none">#{order.short_id}</h2>
-                                        <p className="text-sm text-gray-600 font-medium mt-1 leading-tight">
+                                        <p className="text-sm text-gray-600 font-medium mt-1 leading-tight truncate">
                                             {order.customerName} • {order.phone}
                                         </p>
                                         <p className="text-red-700 font-bold text-sm mt-1 bg-red-50/80 inline-block px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right shrink-0">
                                         <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Abholung</span>
                                         <p className="text-3xl font-black text-gray-900 tracking-tighter leading-none">{order.pickup_time}</p>
                                     </div>

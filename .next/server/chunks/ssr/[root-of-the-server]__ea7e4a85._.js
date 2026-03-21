@@ -1,3 +1,0 @@
-module.exports=[21290,a=>{a.v({className:"inter_5901b7c6-module__ec5Qua__className",variable:"inter_5901b7c6-module__ec5Qua__variable"})},43822,a=>{"use strict";var b=a.i(98776),c=a.i(21290);let d={className:c.default.className,style:{fontFamily:"'Inter', 'Inter Fallback'",fontStyle:"normal"}};function e({children:a}){return(0,b.jsx)("html",{lang:"de",children:(0,b.jsx)("body",{className:`${d.variable} antialiased`,children:a})})}null!=c.default.variable&&(d.variable=c.default.variable),a.s(["default",()=>e,"metadata",0,{title:"Istanbul Grillhaus – Online Bestellen",description:"Döner, Pizza & mehr online bestellen bei Istanbul Grillhaus in Weilheim. 100% Halal."}],43822)}];
-
-//# sourceMappingURL=%5Broot-of-the-server%5D__ea7e4a85._.js.map

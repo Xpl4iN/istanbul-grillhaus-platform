@@ -82,6 +82,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     const [showCheckout, setShowCheckout] = useState(false);
     const [isOpen, setIsOpen] = useState(initialIsOpen);
     const [showLMIVModal, setShowLMIVModal] = useState(false);
+    const [editingCartItem, setEditingCartItem] = useState<{ id: string; product: Product; modifiers: Record<string, string[]> } | null>(null);
     const { items, getTotal, removeItem, setItemQuantity, isTestMode } = useCartStore();
 
     // Update isOpen state based on actual business hours
@@ -219,7 +220,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 {items.map(item => (
                                     <li key={item.id} className="py-3 flex justify-between items-center border-b last:border-0"
                                         style={{ borderColor: "#eddfc8" }}>
-                                        <div>
+                                        <div className="flex-1 min-w-0">
                                             <p className="font-semibold text-sm" style={{ color: "#1a1008" }}>{item.quantity}× {item.product.name}</p>
                                             {Object.keys(item.modifiers).length > 0 && (
                                                 <ul className="text-[11px] mt-1 space-y-0.5 font-medium" style={{ color: "#8b1a1a", opacity: 0.85 }}>
@@ -233,8 +234,17 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                                     })}
                                                 </ul>
                                             )}
+                                            {(item.product.modifier_groups?.length ?? 0) > 0 && (
+                                                <button
+                                                    onClick={() => setEditingCartItem({ id: item.id, product: item.product, modifiers: item.modifiers })}
+                                                    className="text-[11px] mt-1 font-semibold hover:underline"
+                                                    style={{ color: "#b8860b" }}
+                                                >
+                                                    ✏️ Anpassen
+                                                </button>
+                                            )}
                                         </div>
-                                        <div className="flex gap-3 items-center">
+                                        <div className="flex gap-3 items-center shrink-0">
                                             <div className="flex items-center gap-1">
                                                 <button
                                                     onClick={() => setItemQuantity(item.id, item.quantity - 1)}
@@ -376,6 +386,16 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             )}
 
             {selectedProduct && <Configurator product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+
+            {editingCartItem && (
+                <Configurator
+                    product={editingCartItem.product}
+                    onClose={() => setEditingCartItem(null)}
+                    editCartItemId={editingCartItem.id}
+                    initialModifiers={editingCartItem.modifiers}
+                    hideDrinkUpsell
+                />
+            )}
 
             {/* Sticky cart button */}
             {!showCheckout && items.length > 0 && (
