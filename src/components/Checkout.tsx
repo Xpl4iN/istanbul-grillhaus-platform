@@ -315,7 +315,7 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                         Zahlungsart
                         <span className="text-[#8b1a1a] ml-1">*</span>
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className={`grid gap-3 ${(features.onlinePayments || features.online_payments) ? 'grid-cols-2' : 'grid-cols-1'}`}>
                         <button
                             type="button"
                             onClick={() => setPaymentMethod('cash')}
@@ -332,22 +332,24 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                             <span className="font-bold text-sm">Bar / Karte</span>
                             <span className={`text-xs ${paymentMethod === 'cash' ? 'text-white/80' : 'text-[#5c4a32]'}`}>Bei Abholung</span>
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('stripe')}
-                            className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center ${
-                                paymentMethod === 'stripe'
-                                    ? 'border-[#8b1a1a] bg-[#8b1a1a] text-white shadow-lg scale-[1.03]'
-                                    : 'border-[#ddd0b8] bg-[#fffdf9] text-[#1a1008] hover:border-[#8b1a1a] hover:bg-[#fdf5ee]'
-                            }`}
-                        >
-                            {paymentMethod === 'stripe' && (
-                                <span className="absolute top-2 right-2 text-xs bg-white/20 rounded-full px-1.5 py-0.5 font-bold">✓</span>
-                            )}
-                            <span className="text-2xl">💳</span>
-                            <span className="font-bold text-sm">Online zahlen</span>
-                            <span className={`text-xs ${paymentMethod === 'stripe' ? 'text-white/80' : 'text-[#5c4a32]'}`}>Karte / PayPal</span>
-                        </button>
+                        {(features.onlinePayments || features.online_payments) && (
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod('stripe')}
+                                className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center ${
+                                    paymentMethod === 'stripe'
+                                        ? 'border-[#8b1a1a] bg-[#8b1a1a] text-white shadow-lg scale-[1.03]'
+                                        : 'border-[#ddd0b8] bg-[#fffdf9] text-[#1a1008] hover:border-[#8b1a1a] hover:bg-[#fdf5ee]'
+                                }`}
+                            >
+                                {paymentMethod === 'stripe' && (
+                                    <span className="absolute top-2 right-2 text-xs bg-white/20 rounded-full px-1.5 py-0.5 font-bold">✓</span>
+                                )}
+                                <span className="text-2xl">💳</span>
+                                <span className="font-bold text-sm">Online zahlen</span>
+                                <span className={`text-xs ${paymentMethod === 'stripe' ? 'text-white/80' : 'text-[#5c4a32]'}`}>Karte / PayPal</span>
+                            </button>
+                        )}
                     </div>
                     {paymentMethod === 'stripe' && (
                         <p className="mt-2 text-xs text-[#5c4a32] bg-[#fdf5ee] border border-[#ddd0b8] rounded-xl p-2 text-center">
