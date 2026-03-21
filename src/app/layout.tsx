@@ -32,6 +32,7 @@ export default function RootLayout({
                     localStorage.setItem("trafficSource", "qr");
                   }
                 } catch (error) {
+                  console.error("Failed to set trafficSource:", error);
                 }
               }
             })();
