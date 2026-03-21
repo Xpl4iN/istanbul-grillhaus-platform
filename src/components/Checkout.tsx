@@ -40,6 +40,7 @@ const DiningTile = ({
 const PAYMENT_METHOD_CONFIG: Record<string, { icon: string; label: string; sublabel: string }> = {
     cash: { icon: "💵", label: "Barzahlung", sublabel: "Bei Abholung bar bezahlen" },
     card: { icon: "💳", label: "Kartenzahlung", sublabel: "EC-/Kreditkarte vor Ort" },
+    online: { icon: "🌐", label: "Online zahlen", sublabel: "Sichere Zahlung im Voraus" },
 };
 
 export default function Checkout({ onComplete, features = {} }: { onComplete: () => void, features?: any }) {
@@ -55,17 +56,23 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
 
     const allowPickup = features.allowPickup ?? true;
     const allowDineIn = features.allowDineIn ?? false;
-    const paymentMethods: string[] = Array.isArray(features.paymentMethods)
-        ? features.paymentMethods
-        : ["cash", "card"];
+    const allowDelivery = features.allowDelivery === true;
+    const onlinePayments = features.onlinePayments === true;
+    const paymentMethods: string[] = useMemo(
+        () => onlinePayments ? ["cash", "card", "online"] : ["cash", "card"],
+        [onlinePayments]
+    );
     
     // Automatically select an option if only one is available and none provided yet
     useEffect(() => {
         if (!diningOption) {
-            if (allowPickup && !allowDineIn) setDiningOption("takeaway");
-            else if (allowDineIn && !allowPickup) setDiningOption("dine-in");
+            const availableOptions: Array<'takeaway' | 'dine-in' | 'delivery'> = [];
+            if (allowPickup) availableOptions.push("takeaway");
+            if (allowDineIn) availableOptions.push("dine-in");
+            if (allowDelivery) availableOptions.push("delivery");
+            if (availableOptions.length === 1) setDiningOption(availableOptions[0]);
         }
-    }, [diningOption, allowPickup, allowDineIn, setDiningOption]);
+    }, [diningOption, allowPickup, allowDineIn, allowDelivery, setDiningOption]);
 
     // Auto-select payment method if only one is available
     useEffect(() => {
@@ -200,6 +207,9 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
         }
     };
 
+    const activeDiningCount = [allowPickup, allowDineIn, allowDelivery].filter(Boolean).length;
+    const diningGridCols = activeDiningCount === 3 ? 'grid-cols-3' : activeDiningCount === 2 ? 'grid-cols-2' : 'grid-cols-1';
+
     return (
         <div className="bg-[#fffdf9] p-6 rounded-2xl shadow-xl space-y-5 border border-[#ddd0b8]">
             {features.maintenanceMode ? (
@@ -216,13 +226,13 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
             <form onSubmit={handleOrder} className="space-y-5">
 
                 {/* Dining Option Tiles */}
-                {(allowPickup || allowDineIn) && (
+                {(allowPickup || allowDineIn || allowDelivery) && (
                     <div>
                         <label className="block text-sm font-semibold text-[#1a1008] mb-2">
                             Wie möchten Sie essen?
                             <span className="text-[#8b1a1a] ml-1">*</span>
                         </label>
-                        <div className={`grid gap-3 ${allowPickup && allowDineIn ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        <div className={`grid gap-3 ${diningGridCols}`}>
                             {allowPickup && (
                                 <DiningTile
                                     icon="🏠"
@@ -239,6 +249,15 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                                     sublabel="Im Restaurant essen"
                                     selected={diningOption === "dine-in"}
                                     onClick={() => setDiningOption("dine-in")}
+                                />
+                            )}
+                            {allowDelivery && (
+                                <DiningTile
+                                    icon="🚗"
+                                    label="Lieferung"
+                                    sublabel="Direkt nach Hause"
+                                    selected={diningOption === "delivery"}
+                                    onClick={() => setDiningOption("delivery")}
                                 />
                             )}
                         </div>
@@ -341,6 +360,8 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                         ? 'Hinweis: Barzahlung bei Abholung.'
                         : paymentMethod === 'card'
                         ? 'Hinweis: Kartenzahlung bei Abholung.'
+                        : paymentMethod === 'online'
+                        ? 'Hinweis: Online-Zahlung – Sie werden nach der Bestellung zum Bezahlen weitergeleitet.'
                         : 'Hinweis: Zahlung erfolgt vor Ort bei Abholung.'}
                 </div>
 

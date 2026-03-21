@@ -1,7 +1,40 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export default function OrderTracker() {
+const ReviewPrompt = () => {
+    const [rating, setRating] = useState(0);
+    const [submitted, setSubmitted] = useState(false);
+
+    if (submitted) {
+        return (
+            <div className="mt-4 mb-4 p-4 rounded-xl border text-center" style={{ background: "#f0fdf4", borderColor: "#b4e8c1" }}>
+                <span className="text-2xl">🙏</span>
+                <p className="text-sm font-semibold mt-1" style={{ color: "#166534" }}>Danke für deine Bewertung!</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-2 mb-6 p-4 rounded-xl border" style={{ background: "#fffdf9", borderColor: "#ddd0b8" }}>
+            <p className="text-sm font-semibold mb-3 text-center" style={{ color: "#1a1008" }}>Wie war dein Erlebnis?</p>
+            <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                        key={star}
+                        type="button"
+                        onClick={() => { setRating(star); setSubmitted(true); }}
+                        className="text-3xl transition-transform hover:scale-110 active:scale-95"
+                        aria-label={`${star} Sterne`}
+                    >
+                        {star <= rating ? "⭐" : "☆"}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default function OrderTracker({ features = {} }: { features?: any }) {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
@@ -98,6 +131,9 @@ export default function OrderTracker() {
                             Vielen Dank für deinen Einkauf!
                         </p>
                     )}
+                    {!isCancelled && features.allowReviews && (
+                        <ReviewPrompt />
+                    )}
                     <button onClick={async () => {
                         await fetch("/api/orders/track", { method: "DELETE" });
                         setOrder(null);
@@ -122,12 +158,12 @@ export default function OrderTracker() {
                     {order.dining_option && (
                         <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-bold border"
                             style={{
-                                background: order.dining_option === "dine-in" ? "#eff6ff" : "#f0fdf4",
-                                borderColor: order.dining_option === "dine-in" ? "#bfdbfe" : "#bbf7d0",
-                                color: order.dining_option === "dine-in" ? "#1e40af" : "#166534"
+                                background: order.dining_option === "dine-in" ? "#eff6ff" : order.dining_option === "delivery" ? "#fef9c3" : "#f0fdf4",
+                                borderColor: order.dining_option === "dine-in" ? "#bfdbfe" : order.dining_option === "delivery" ? "#fde68a" : "#bbf7d0",
+                                color: order.dining_option === "dine-in" ? "#1e40af" : order.dining_option === "delivery" ? "#92400e" : "#166534"
                             }}
                         >
-                            {order.dining_option === "dine-in" ? "🍽️ Vor Ort essen" : "🏠 Zum Mitnehmen"}
+                            {order.dining_option === "dine-in" ? "🍽️ Vor Ort essen" : order.dining_option === "delivery" ? "🚗 Lieferung" : "🏠 Zum Mitnehmen"}
                         </span>
                     )}
                 </div>

@@ -79,7 +79,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       <TestModeToggle />
-      <OrderTracker />
+      <OrderTracker features={features} />
       <Menu 
         initialProducts={products as any} 
         initialIsOpen={isOpen} 
