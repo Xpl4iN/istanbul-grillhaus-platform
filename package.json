@@ -15,6 +15,7 @@
         "@stripe/react-stripe-js": "^5.6.1",
         "@stripe/stripe-js": "^8.11.0",
         "@supabase/supabase-js": "^2.99.3",
+        "@vercel/analytics": "^2.0.1",
         "clsx": "^2.1.1",
         "libphonenumber-js": "^1.12.38",
         "lucide-react": "^0.575.0",
