@@ -31,7 +31,7 @@ const generateShortId = () => {
 
 export async function POST(req: Request) {
     try {
-        const { customer, items, pickup_time, total_price, tip_amount, dining_option, turnstile_token } = await req.json();
+        const { customer, items, pickup_time, total_price, tip_amount, dining_option, payment_method, turnstile_token } = await req.json();
         const clientIp = (req.headers.get('x-forwarded-for') || "127.0.0.1").split(",")[0].trim();
 
         // Validate Turnstile token
@@ -90,6 +90,7 @@ export async function POST(req: Request) {
                 pickup_time: new Date(pickup_time),
                 ip_address: clientIp,
                 dining_option: dining_option ?? null,
+                payment_method: payment_method ?? null,
                 items: {
                     create: items.map((item: any) => ({
                         product_id: item.product_id,

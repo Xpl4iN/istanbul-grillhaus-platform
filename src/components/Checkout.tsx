@@ -37,6 +37,11 @@ const DiningTile = ({
     </button>
 );
 
+const PAYMENT_METHOD_CONFIG: Record<string, { icon: string; label: string; sublabel: string }> = {
+    cash: { icon: "💵", label: "Barzahlung", sublabel: "Bei Abholung bar bezahlen" },
+    card: { icon: "💳", label: "Kartenzahlung", sublabel: "EC-/Kreditkarte vor Ort" },
+};
+
 export default function Checkout({ onComplete, features = {} }: { onComplete: () => void, features?: any }) {
     const { items, getTotal, clearCart, isTestMode, diningOption, setDiningOption } = useCartStore();
     const [name, setName] = useState("");
@@ -46,9 +51,13 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
     const [turnstileToken, setTurnstileToken] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [tip, setTip] = useState(0);
+    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
 
     const allowPickup = features.allowPickup ?? true;
     const allowDineIn = features.allowDineIn ?? false;
+    const paymentMethods: string[] = Array.isArray(features.paymentMethods)
+        ? features.paymentMethods
+        : ["cash", "card"];
     
     // Automatically select an option if only one is available and none provided yet
     useEffect(() => {
@@ -57,6 +66,13 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
             else if (allowDineIn && !allowPickup) setDiningOption("dine-in");
         }
     }, [diningOption, allowPickup, allowDineIn, setDiningOption]);
+
+    // Auto-select payment method if only one is available
+    useEffect(() => {
+        if (!paymentMethod && paymentMethods.length === 1) {
+            setPaymentMethod(paymentMethods[0]);
+        }
+    }, [paymentMethod, paymentMethods]);
 
     useEffect(() => {
         if (isTestMode) {
@@ -125,6 +141,10 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
             alert("Bitte wählen Sie, ob Sie Vor-Ort essen oder mitnehmen möchten.");
             return;
         }
+        if (paymentMethods.length > 0 && !paymentMethod) {
+            alert("Bitte wählen Sie eine Zahlungsmethode.");
+            return;
+        }
         if (!turnstileToken && !isTestMode) {
             alert("Bitte bestästigen Sie, dass Sie ein Mensch sind.");
             return;
@@ -158,6 +178,7 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                     total_price: getTotal() + tip,
                     tip_amount: tip,
                     dining_option: diningOption,
+                    payment_method: paymentMethod,
                     turnstile_token: isTestMode ? "mock-token-for-dev" : turnstileToken,
                 }),
             });
@@ -249,6 +270,32 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                     </div>
                 )}
 
+                {/* Payment Method Selector */}
+                {paymentMethods.length > 0 && (
+                    <div>
+                        <label className="block text-sm font-semibold text-[#1a1008] mb-2">
+                            Zahlungsmethode
+                            <span className="text-[#8b1a1a] ml-1">*</span>
+                        </label>
+                        <div className={`grid gap-3 ${paymentMethods.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                            {paymentMethods.map((method) => {
+                                const config = PAYMENT_METHOD_CONFIG[method];
+                                if (!config) return null;
+                                return (
+                                    <DiningTile
+                                        key={method}
+                                        icon={config.icon}
+                                        label={config.label}
+                                        sublabel={config.sublabel}
+                                        selected={paymentMethod === method}
+                                        onClick={() => setPaymentMethod(method)}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {ENABLE_TIPS && (
                     <div className="pt-2">
                         <label className="block text-sm font-medium mb-2 text-[#1a1008]">Trinkgeld (Optional)</label>
@@ -290,11 +337,15 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                 )}
 
                 <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded-xl border border-blue-100">
-                    Hinweis: Zahlung erfolgt in bar oder per Karte bei Abholung.
+                    {paymentMethod === 'cash'
+                        ? 'Hinweis: Barzahlung bei Abholung.'
+                        : paymentMethod === 'card'
+                        ? 'Hinweis: Kartenzahlung bei Abholung.'
+                        : 'Hinweis: Zahlung erfolgt vor Ort bei Abholung.'}
                 </div>
 
                 <button
-                    disabled={isSubmitting || items.length === 0 || !diningOption}
+                    disabled={isSubmitting || items.length === 0 || !diningOption || (paymentMethods.length > 0 && !paymentMethod)}
                     type="submit"
                     className="w-full py-3 bg-[#8b1a1a] text-white font-bold rounded-xl disabled:opacity-40 hover:bg-[#6e1313] transition-colors"
                 >

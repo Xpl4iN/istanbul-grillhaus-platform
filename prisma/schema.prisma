@@ -97,18 +97,19 @@ model Modifier {
 }
 
 model Order {
-  id             String      @id @default(uuid())
-  organizationId String
-  short_id       String      @unique
-  customer_id    String
-  status         String      @default("PENDING")
-  total_price    Float
-  pickup_time    DateTime
-  ip_address     String?
-  tip_amount     Float?      @default(0)
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @default(now())
-  dining_option  String?
+  id              String      @id @default(uuid())
+  organizationId  String
+  short_id        String      @unique
+  customer_id     String
+  status          String      @default("PENDING")
+  total_price     Float
+  pickup_time     DateTime
+  ip_address      String?
+  tip_amount      Float?      @default(0)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @default(now())
+  dining_option   String?
+  payment_method  String?
   
   organization   Organization @relation(fields: [organizationId], references: [id])
   customer       Customer    @relation(fields: [customer_id], references: [id], onDelete: Restrict)
