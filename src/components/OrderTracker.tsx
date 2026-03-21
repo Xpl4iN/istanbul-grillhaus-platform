@@ -4,6 +4,34 @@ import { useState, useEffect } from "react";
 const ReviewPrompt = () => {
     const [rating, setRating] = useState(0);
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleRating = async (star: number) => {
+        if (submitting || submitted) return;
+        setRating(star);
+        setSubmitting(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/reviews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ score: star })
+            });
+            if (res.ok || res.status === 409) {
+                setSubmitted(true);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || "Bewertung konnte nicht gespeichert werden.");
+                setRating(0);
+            }
+        } catch {
+            setError("Netzwerkfehler. Bitte versuche es erneut.");
+            setRating(0);
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     if (submitted) {
         return (
@@ -22,14 +50,17 @@ const ReviewPrompt = () => {
                     <button
                         key={star}
                         type="button"
-                        onClick={() => { setRating(star); setSubmitted(true); }}
-                        className="text-3xl transition-transform hover:scale-110 active:scale-95"
+                        onClick={() => handleRating(star)}
+                        disabled={submitting}
+                        className="text-3xl transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={`${star} Sterne`}
                     >
                         {star <= rating ? "⭐" : "☆"}
                     </button>
                 ))}
             </div>
+            {submitting && <p className="text-xs text-center mt-2" style={{ color: "#5c4a32" }}>Wird gespeichert…</p>}
+            {error && <p className="text-xs text-center mt-2" style={{ color: "#991b1b" }}>{error}</p>}
         </div>
     );
 };

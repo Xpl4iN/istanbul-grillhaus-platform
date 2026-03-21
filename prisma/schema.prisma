@@ -21,6 +21,7 @@ model Organization {
   customers    Customer[]
   shopSettings ShopSettings[]
   reservations Reservation[]
+  reviews      Review[]
 }
 
 model User {
@@ -114,6 +115,7 @@ model Order {
   organization   Organization @relation(fields: [organizationId], references: [id])
   customer       Customer    @relation(fields: [customer_id], references: [id], onDelete: Restrict)
   items          OrderItem[]
+  review         Review?
 
   @@index([organizationId])
 }
@@ -149,6 +151,7 @@ model Customer {
   
   organization     Organization @relation(fields: [organizationId], references: [id])
   orders           Order[]
+  reviews          Review[]
 
   
   @@index([organizationId])
@@ -185,6 +188,22 @@ model ShopSettings {
   opening_hours_json String
   
   organization       Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+}
+
+model Review {
+  id             String       @id @default(cuid())
+  organizationId String
+  order_id       String       @unique
+  customer_id    String?
+  score          Int
+  comment        String?
+  created_at     DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  order          Order        @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  customer       Customer?    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
 
   @@index([organizationId])
 }
