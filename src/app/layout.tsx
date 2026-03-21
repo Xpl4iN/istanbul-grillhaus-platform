@@ -31,8 +31,16 @@ export default function RootLayout({
                   if (typeof window.localStorage !== "undefined") {
                     localStorage.setItem("trafficSource", "qr");
                   }
+                  
+                  // TEA QR Scan Tracker (Beacon API POST)
+                  const teaUrl = "https://tea.xyourp.com/api/qr/track/69a2c008faf8b7b90f74516e";
+                  if (navigator.sendBeacon) {
+                    navigator.sendBeacon(teaUrl);
+                  } else {
+                    fetch(teaUrl, { method: "POST", keepalive: true }).catch(() => {});
+                  }
                 } catch (error) {
-                  console.error("Failed to set trafficSource:", error);
+                  console.error("Failed to track QR scan source:", error);
                 }
               }
             })();
