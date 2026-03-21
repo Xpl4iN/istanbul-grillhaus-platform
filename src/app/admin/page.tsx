@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState, useRef } from "react";
 
 export default function AdminDashboard() {
@@ -178,9 +178,23 @@ export default function AdminDashboard() {
                                         <p className="text-sm text-gray-600 font-medium mt-1 leading-tight">
                                             {order.customerName} • {order.phone}
                                         </p>
-                                        <p className="text-red-700 font-bold text-sm mt-1 bg-red-50/80 inline-block px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
-                                            ZAHLT VOR ORT: {Number(order.total_price).toFixed(2)} €
-                                        </p>
+                                        
+                                        {/* Payment Status Badge */}
+                                        {order.payment_method === 'stripe' ? (
+                                            order.payment_status === 'paid' ? (
+                                                <p className="text-green-700 font-black text-sm mt-1 bg-green-50/80 inline-block px-1.5 py-0.5 rounded border border-green-200 whitespace-nowrap uppercase italic tracking-tighter">
+                                                    ✅ Online Bezahlt: {Number(order.total_price).toFixed(2)} €
+                                                </p>
+                                            ) : (
+                                                <p className="text-orange-700 font-black text-sm mt-1 bg-orange-50/80 inline-block px-1.5 py-0.5 rounded border border-orange-200 whitespace-nowrap uppercase italic tracking-tighter animate-pulse">
+                                                    ⏳ Zahlung Ausstehend: {Number(order.total_price).toFixed(2)} €
+                                                </p>
+                                            )
+                                        ) : (
+                                            <p className="text-red-700 font-bold text-sm mt-1 bg-red-50/80 inline-block px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
+                                                ZAHLT VOR ORT: {Number(order.total_price).toFixed(2)} €
+                                            </p>
+                                        )}
                                         {order.dining_option && (
                                             <div className="mt-1.5">
                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black border ${order.dining_option === 'dine-in'

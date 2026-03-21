@@ -33,6 +33,8 @@ export async function GET() {
             pickup_time: new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(new Date(o.pickup_time)),
             status: o.status,
             dining_option: o.dining_option ?? null,
+            payment_method: (o as any).payment_method ?? 'cash',
+            payment_status: (o as any).payment_status ?? 'unpaid',
             items: o.items.map(i => ({
                 quantity: i.quantity,
                 productName: i.product.name,
