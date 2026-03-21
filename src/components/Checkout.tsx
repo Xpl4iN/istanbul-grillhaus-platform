@@ -337,7 +337,11 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                 )}
 
                 <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded-xl border border-blue-100">
-                    Hinweis: Zahlung erfolgt vor Ort bei Abholung.
+                    {paymentMethod === 'cash'
+                        ? 'Hinweis: Barzahlung bei Abholung.'
+                        : paymentMethod === 'card'
+                        ? 'Hinweis: Kartenzahlung bei Abholung.'
+                        : 'Hinweis: Zahlung erfolgt vor Ort bei Abholung.'}
                 </div>
 
                 <button

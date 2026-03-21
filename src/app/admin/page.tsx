@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                                             {order.customerName} • {order.phone}
                                         </p>
                                         <p className="text-red-700 font-bold text-sm mt-1 bg-red-50/80 inline-block px-1.5 py-0.5 rounded border border-red-100 whitespace-nowrap">
-                                            ZAHLT VOR ORT{order.payment_method === 'card' ? ' (Karte)' : order.payment_method === 'cash' ? ' (Bar)' : ''}: {Number(order.total_price).toFixed(2)} €
+                                            ZAHLT VOR ORT{order.payment_method ? ` (${order.payment_method === 'card' ? 'Karte' : 'Bar'})` : ''}: {Number(order.total_price).toFixed(2)} €
                                         </p>
                                         {order.dining_option && (
                                             <div className="mt-1.5">
