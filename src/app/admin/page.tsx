@@ -11,6 +11,7 @@ export default function AdminDashboard() {
     const [isConnected, setIsConnected] = useState(true);
     const prevOrdersRef = useRef<any[]>([]);
     const isAudioEnabledRef = useRef(false);
+    const pendingStatusRef = useRef<Record<string, string>>({});
 
     useEffect(() => {
         const fetchInitial = async () => {
@@ -40,8 +41,19 @@ export default function AdminDashboard() {
                     }
                 }
 
-                prevOrdersRef.current = fetchedOrders;
-                setOrders(fetchedOrders);
+                const mergedOrders = fetchedOrders.map((order: any) => {
+                    const pendingStatus = pendingStatusRef.current[order.id];
+                    if (pendingStatus && order.status !== pendingStatus) {
+                        return { ...order, status: pendingStatus };
+                    }
+                    if (pendingStatus && order.status === pendingStatus) {
+                        delete pendingStatusRef.current[order.id];
+                    }
+                    return order;
+                });
+
+                prevOrdersRef.current = mergedOrders;
+                setOrders(mergedOrders);
             } catch (e) { console.error("Poll Error:", e); }
         };
         fetchInitial();
@@ -105,12 +117,22 @@ export default function AdminDashboard() {
     };
 
     const updateStatus = async (id: string, newStatus: string) => {
-        await fetch(`/api/admin/orders/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-        });
+        pendingStatusRef.current[id] = newStatus;
         setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+        try {
+            const res = await fetch(`/api/admin/orders/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (!res.ok) {
+                delete pendingStatusRef.current[id];
+                alert("Fehler beim Status-Update.");
+            }
+        } catch {
+            delete pendingStatusRef.current[id];
+            alert("Fehler beim Status-Update.");
+        }
     };
 
     const handleBlacklist = async (order: any) => {
@@ -292,4 +314,3 @@ export default function AdminDashboard() {
         </>
     );
 }
-
