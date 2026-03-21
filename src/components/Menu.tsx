@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Product, useCartStore } from "@/store/cartStore";
+import { Product, CartItem, useCartStore } from "@/store/cartStore";
 import Configurator from "./Configurator";
 import Checkout from "./Checkout";
 import { Caveat_Brush } from "next/font/google";
@@ -82,7 +82,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     const [showCheckout, setShowCheckout] = useState(false);
     const [isOpen, setIsOpen] = useState(initialIsOpen);
     const [showLMIVModal, setShowLMIVModal] = useState(false);
-    const [editingCartItem, setEditingCartItem] = useState<{ id: string; product: Product; modifiers: Record<string, string[]> } | null>(null);
+    const [editingCartItem, setEditingCartItem] = useState<Pick<CartItem, 'id' | 'product' | 'modifiers'> | null>(null);
     const { items, getTotal, removeItem, setItemQuantity, isTestMode } = useCartStore();
 
     // Update isOpen state based on actual business hours

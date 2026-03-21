@@ -16,7 +16,15 @@ function ProductSuperscript({ allergens, additives }: { allergens?: string | nul
     );
 }
 
-export default function Configurator({ product, onClose, editCartItemId, initialModifiers, hideDrinkUpsell }: { product: Product, onClose: () => void, editCartItemId?: string, initialModifiers?: Record<string, string[]>, hideDrinkUpsell?: boolean }) {
+interface ConfiguratorProps {
+    product: Product;
+    onClose: () => void;
+    editCartItemId?: string;
+    initialModifiers?: Record<string, string[]>;
+    hideDrinkUpsell?: boolean;
+}
+
+export default function Configurator({ product, onClose, editCartItemId, initialModifiers, hideDrinkUpsell }: ConfiguratorProps) {
     const { addItem, updateItem, items } = useCartStore();
     const [selectedMods, setSelectedMods] = useState<Record<string, string[]>>(initialModifiers || {});
 
