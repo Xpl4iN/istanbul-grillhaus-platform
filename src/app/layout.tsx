@@ -27,7 +27,12 @@ export default function RootLayout({
             (() => {
               const source = new URLSearchParams(window.location.search).get("src");
               if (source === "qr") {
-                localStorage.setItem("trafficSource", "qr");
+                try {
+                  if (typeof window.localStorage !== "undefined") {
+                    localStorage.setItem("trafficSource", "qr");
+                  }
+                } catch (error) {
+                }
               }
             })();
           `}
