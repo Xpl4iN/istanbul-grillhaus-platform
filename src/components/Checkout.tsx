@@ -38,9 +38,8 @@ const DiningTile = ({
 );
 
 const PAYMENT_METHOD_CONFIG: Record<string, { icon: string; label: string; sublabel: string }> = {
-    cash: { icon: "💵", label: "Barzahlung", sublabel: "Bei Abholung bar bezahlen" },
-    card: { icon: "💳", label: "Kartenzahlung", sublabel: "EC-/Kreditkarte vor Ort" },
-    online: { icon: "🌐", label: "Online zahlen", sublabel: "Sichere Zahlung im Voraus" },
+    local: { icon: "💵💳", label: "Bar / Karte", sublabel: "Zahlung vor Ort bei Abholung" },
+    online: { icon: "🌐", label: "Sicher online bezahlen", sublabel: "Sichere Zahlung im Voraus" },
 };
 
 export default function Checkout({ onComplete, features = {} }: { onComplete: () => void, features?: any }) {
@@ -59,7 +58,7 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
     const allowDelivery = features.allowDelivery === true;
     const onlinePayments = features.onlinePayments === true;
     const paymentMethods: string[] = useMemo(
-        () => onlinePayments ? ["cash", "card", "online"] : ["cash", "card"],
+        () => onlinePayments ? ["local", "online"] : ["local"],
         [onlinePayments]
     );
     
@@ -356,10 +355,8 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                 )}
 
                 <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded-xl border border-blue-100">
-                    {paymentMethod === 'cash'
-                        ? 'Hinweis: Barzahlung bei Abholung.'
-                        : paymentMethod === 'card'
-                        ? 'Hinweis: Kartenzahlung bei Abholung.'
+                    {paymentMethod === 'local'
+                        ? 'Hinweis: Zahlung vor Ort (Bar oder Karte) bei Abholung.'
                         : paymentMethod === 'online'
                         ? 'Hinweis: Online-Zahlung – Sie werden nach der Bestellung zum Bezahlen weitergeleitet.'
                         : 'Hinweis: Zahlung erfolgt vor Ort bei Abholung.'}
