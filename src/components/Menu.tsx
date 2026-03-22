@@ -72,17 +72,17 @@ const isStoreOpen = (hours: any) => {
     const currentDay = days[now.getDay()];
     const formatter = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hour12: false });
     const currentTimeStr = formatter.format(now);
-    
+
     // Fallback support for both lowercase and capital day names
     const todayHours = hours[currentDay] || hours[currentDay.charAt(0).toUpperCase() + currentDay.slice(1)];
-    
+
     if (!todayHours || !todayHours.open || !todayHours.close) return false;
     return currentTimeStr >= todayHours.open && currentTimeStr <= todayHours.close;
 };
 
 const formatOpeningHours = (hours: any) => {
     if (!hours) return "Öffnungszeiten nicht hinterlegt";
-    
+
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const dayLabels: Record<string, string> = {
         'Monday': 'Mo', 'Tuesday': 'Di', 'Wednesday': 'Mi', 'Thursday': 'Do', 'Friday': 'Fr', 'Saturday': 'Sa', 'Sunday': 'So'
@@ -94,7 +94,7 @@ const formatOpeningHours = (hours: any) => {
     dayNames.forEach(day => {
         const schedule = hours[day] || hours[day.toLowerCase()];
         const hoursStr = (schedule?.open && schedule?.close) ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
-        
+
         if (currentGroup && currentGroup.hours === hoursStr) {
             currentGroup.days.push(day);
         } else {
@@ -136,7 +136,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 hour12: false
             }).format(now);
             setCurrentTime(berlinTime);
-            
+
             setIsOpen(isStoreOpen(openingHours));
         };
         update();
@@ -205,10 +205,10 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         Lade Status...
                     </div>
                 ) : (
-                    <div className={`p-4 rounded-xl border flex flex-col items-center gap-1 shadow-sm transition-all ${isCurrentlyOpen 
-                        ? "bg-green-50 border-green-200 text-green-800" 
+                    <div className={`p-4 rounded-xl border flex flex-col items-center gap-1 shadow-sm transition-all ${isCurrentlyOpen
+                        ? "bg-green-50 border-green-200 text-green-800"
                         : "bg-red-50 border-red-200 text-red-800"}`}>
-                        
+
                         <div className="w-full flex justify-center py-1">
                             {/* This container will be exactly as wide as the text, 
                                 centered in the parent. The icon will sit to its right. */}
@@ -216,11 +216,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 <span className="text-xl font-black uppercase tracking-wider leading-none">
                                     {isCurrentlyOpen ? "Geöffnet" : "Geschlossen"}
                                 </span>
-                                
+
                                 {/* Absolute positioning ensures the text stays 
                                     centered regardless of the icon's existence */}
-                                <div className="absolute left-full top-1/2 -translate-y-[55%] ml-2">
-                                    <button 
+                                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2">
+                                    <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setShowHoursModal(true);
@@ -228,7 +228,23 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                         className={`p-1 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50 text-green-900" : "hover:bg-red-200/50 text-red-900"}`}
                                         title="Alle Öffnungszeiten anzeigen"
                                     >
-                                        <Info className="w-5 h-5" />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="28"
+                                            viewBox="0 1 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="w-5 h-5"
+                                            aria-hidden="true"
+                                        >
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 16v-4"></path>
+                                            <path d="M12 8h.01"></path>
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -240,17 +256,17 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
                                 const now = new Date();
                                 const currentDayIdx = now.getDay();
-                                
+
                                 if (isCurrentlyOpen) {
                                     const today = days[currentDayIdx];
                                     const sched = openingHours[today] || openingHours[today.charAt(0).toUpperCase() + today.slice(1)];
-                                    return `Heute: ${sched?.open || '--:--'} – ${sched?.close || '--:--'} Uhr`;
+                                    return `Heute: ${sched?.open || '--:--'} – ${sched?.close || '--:--'}`;
                                 } else {
                                     const tomorrowIdx = (currentDayIdx + 1) % 7;
                                     const tomorrow = days[tomorrowIdx];
                                     const sched = openingHours[tomorrow] || openingHours[tomorrow.charAt(0).toUpperCase() + tomorrow.slice(1)];
                                     const dayName = tomorrowIdx === 1 ? 'Montag' : tomorrowIdx === 2 ? 'Dienstag' : tomorrowIdx === 3 ? 'Mittwoch' : tomorrowIdx === 4 ? 'Donnerstag' : tomorrowIdx === 5 ? 'Freitag' : tomorrowIdx === 6 ? 'Samstag' : 'Sonntag';
-                                    return `Morgen (${dayName}): ${sched?.open || '--:--'} – ${sched?.close || '--:--'} Uhr`;
+                                    return `Morgen (${dayName}): ${sched?.open || '--:--'} – ${sched?.close || '--:--'}`;
                                 }
                             })()}
                         </div>
@@ -298,11 +314,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 return days.map((day, idx) => {
                                     const sched = openingHours?.[day.key] || openingHours?.[day.key.charAt(0).toUpperCase() + day.key.slice(1)];
                                     const isToday = idx === adjustedTodayIdx;
-                                    
+
                                     return (
-                                        <div key={day.key} 
-                                            className={`flex justify-between items-center p-3 rounded-xl transition-all ${isToday 
-                                                ? "bg-green-100 border-2 border-green-500 scale-[1.02] shadow-sm" 
+                                        <div key={day.key}
+                                            className={`flex justify-between items-center p-3 rounded-xl transition-all ${isToday
+                                                ? "bg-green-100 border-2 border-green-500 scale-[1.02] shadow-sm"
                                                 : "bg-[#f5f0e8]/50 text-gray-700"}`}>
                                             <span className={`font-bold ${isToday ? "text-green-900" : ""}`}>{day.label}</span>
                                             <span className={`font-black ${isToday ? "text-green-700" : "opacity-80"}`}>
@@ -313,7 +329,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 });
                             })()}
                         </div>
-                        <button 
+                        <button
                             onClick={() => setShowHoursModal(false)}
                             className="w-full bg-[#0a5c45] text-white font-black py-4 hover:bg-[#074f3c] transition-colors uppercase tracking-widest text-sm"
                         >
