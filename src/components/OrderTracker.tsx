@@ -82,6 +82,24 @@ export default function OrderTracker() {
 
     if (isDone) {
         const isCancelled = order.status === "CANCELLED";
+        const [rating, setRating] = useState(0);
+        const [comment, setComment] = useState("");
+        const [reviewed, setReviewed] = useState(false);
+        const [submittingReview, setSubmittingReview] = useState(false);
+
+        const submitReview = async () => {
+            if (rating === 0) return;
+            setSubmittingReview(true);
+            try {
+                const res = await fetch("/api/reviews", {
+                    method: "POST",
+                    body: JSON.stringify({ rating, comment })
+                });
+                if (res.ok) setReviewed(true);
+            } catch (e) { console.error(e); }
+            finally { setSubmittingReview(false); }
+        };
+
         return (
             <div className="p-6 rounded-2xl shadow-sm border-2 mb-8 max-w-3xl mx-auto mt-4"
                 style={{
@@ -93,11 +111,49 @@ export default function OrderTracker() {
                     <h2 className="text-2xl font-bold mb-2" style={{ color: isCancelled ? "#991b1b" : "#1a1008" }}>
                         {isCancelled ? `Deine Bestellung ${order.short_id} wurde erfolgreich storniert.` : `Bestellung ${order.short_id} ist ${getStatusText(order.status)}`}
                     </h2>
-                    {!isCancelled && (
+                    
+                    {!isCancelled && order.status === "COMPLETED" && !reviewed && (
+                        <div className="my-6 p-4 rounded-xl border border-[#ddd0b8] bg-white/50">
+                            <p className="font-bold text-sm mb-3" style={{ color: "#5c4a32" }}>Wie hat es geschmeckt?</p>
+                            <div className="flex justify-center gap-2 mb-4">
+                                {[1, 2, 3, 4, 5].map(s => (
+                                    <button key={s} onClick={() => setRating(s)} className="text-3xl transition-transform active:scale-90">
+                                        {s <= rating ? "⭐" : "☆"}
+                                    </button>
+                                ))}
+                            </div>
+                            {rating > 0 && (
+                                <>
+                                    <textarea 
+                                        placeholder="Feedback (optional)..."
+                                        value={comment}
+                                        onChange={e => setComment(e.target.value)}
+                                        className="w-full p-3 text-sm border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#8b1a1a]/20"
+                                        style={{ borderColor: "#ddd0b8" }}
+                                        rows={2}
+                                    />
+                                    <button 
+                                        disabled={submittingReview}
+                                        onClick={submitReview}
+                                        className="w-full py-2 bg-[#8b1a1a] text-white rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50"
+                                    >
+                                        {submittingReview ? "..." : "Senden"}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+
+                    {!isCancelled && reviewed && (
+                        <p className="text-[#1a7a3a] font-bold text-sm my-6">Danke für deine Bewertung! ❤️</p>
+                    )}
+
+                    {!isCancelled && !reviewed && order.status !== "COMPLETED" && (
                         <p className="text-sm mb-6" style={{ color: "#5c4a32" }}>
                             Vielen Dank für deinen Einkauf!
                         </p>
                     )}
+
                     <button onClick={async () => {
                         await fetch("/api/orders/track", { method: "DELETE" });
                         setOrder(null);

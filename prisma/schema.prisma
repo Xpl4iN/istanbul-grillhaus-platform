@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model Organization {
@@ -19,8 +18,26 @@ model Organization {
   products     Product[]
   orders       Order[]
   customers    Customer[]
+  reviews      Review[]
   shopSettings ShopSettings[]
   reservations Reservation[]
+}
+
+model Review {
+  id             String       @id @default(uuid())
+  organizationId String
+  order_id       String?
+  customer_id    String?
+  rating         Int
+  comment        String?
+  customer_name  String?
+  customer_phone String?
+  is_guest       Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
 
 model User {
