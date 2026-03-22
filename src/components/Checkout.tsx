@@ -95,14 +95,44 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
 
     const ENABLE_TIPS = false;
 
+    const [shopSettings, setShopSettings] = useState<any>(null);
+
+    useEffect(() => {
+        fetch('/api/menu').then(r => r.json()).then(data => {
+            if (data.shopSettings) setShopSettings(data.shopSettings);
+        });
+    }, []);
+
+    const openingHours = useMemo(() => {
+        if (!shopSettings?.opening_hours_json) return null;
+        try {
+            return JSON.parse(shopSettings.opening_hours_json);
+        } catch (e) {
+            return null;
+        }
+    }, [shopSettings]);
+
     const timeOptions = useMemo(() => {
+        if (!openingHours) return [];
         const options = [];
         const now = new Date();
+        const berlinNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+        
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const currentDayIdx = berlinNow.getDay();
+        const todayKey = days[currentDayIdx];
+        const schedToday = openingHours[todayKey] || openingHours[todayKey.charAt(0).toUpperCase() + todayKey.slice(1)];
 
-        const firstPickupToday = new Date(now);
-        firstPickupToday.setHours(10, 30, 0, 0);
+        if (!schedToday || !schedToday.open || !schedToday.close) return [];
 
-        let startTime = new Date(now.getTime() + 20 * 60000);
+        const [openH, openM] = schedToday.open.split(':').map(Number);
+        const [closeH, closeM] = schedToday.close.split(':').map(Number);
+
+        const firstPickupToday = new Date(berlinNow);
+        firstPickupToday.setHours(openH, openM, 0, 0);
+
+        // Add 20 mins preparation lead time
+        let startTime = new Date(berlinNow.getTime() + 20 * 60000);
 
         if (startTime < firstPickupToday && !isTestMode) {
             startTime = new Date(firstPickupToday);
@@ -113,33 +143,62 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
             startTime = new Date(startTime.getTime() + (15 - remainder) * 60000);
         }
 
-        if (now.getTime() + 20 * 60000 >= firstPickupToday.getTime() || isTestMode) {
+        const closingTimeToday = new Date(berlinNow);
+        closingTimeToday.setHours(closeH, closeM, 0, 0);
+
+        // Standard ASAP Option if within hours
+        if (berlinNow < closingTimeToday && (berlinNow >= firstPickupToday || isTestMode)) {
             options.push({ label: "Wird sofort abgeholt (ca. 15-20 Min)", value: "ASAP" });
         }
 
-        const endTime = new Date(startTime.getTime() + 90 * 60000);
+        // Generate slots up to 2 hours in the future, but only within opening hours
+        const endRange = new Date(startTime.getTime() + 120 * 60000);
         let current = new Date(startTime);
 
-        while (current <= endTime) {
+        while (current <= endRange && current < closingTimeToday) {
             const h = current.getHours().toString().padStart(2, "0");
             const m = current.getMinutes().toString().padStart(2, "0");
             options.push({ label: `${h}:${m} Uhr`, value: current.toISOString() });
             current = new Date(current.getTime() + 15 * 60000);
         }
-        options.push({ label: "Andere Zeit...", value: "CUSTOM" });
+
+        if (options.length > 0) {
+            options.push({ label: "Andere Zeit...", value: "CUSTOM" });
+        }
         return options;
-    }, [isTestMode]);
+    }, [isTestMode, openingHours]);
 
-    const nowCheck = new Date();
-    const orderStartToday = new Date(nowCheck);
-    orderStartToday.setHours(9, 0, 0, 0);
-    const isOrderingAllowed = nowCheck >= orderStartToday || isTestMode;
+    const isOrderingAllowed = useMemo(() => {
+        if (isTestMode) return true;
+        const now = new Date();
+        const berlinNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+        
+        // General limit for today's orders: 09:00 AM
+        const orderStartToday = new Date(berlinNow);
+        orderStartToday.setHours(9, 0, 0, 0);
+        
+        // Also check if we already passed today's closing time
+        if (!openingHours) return false;
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const todayKey = days[berlinNow.getDay()];
+        const schedToday = openingHours[todayKey] || openingHours[todayKey.charAt(0).toUpperCase() + todayKey.slice(1)];
+        
+        if (!schedToday?.close) return false;
+        const [closeH, closeM] = schedToday.close.split(':').map(Number);
+        const closingTimeToday = new Date(berlinNow);
+        closingTimeToday.setHours(closeH, closeM, 0, 0);
 
-    if (!isOrderingAllowed) {
+        return berlinNow >= orderStartToday && berlinNow < closingTimeToday;
+    }, [isTestMode, openingHours]);
+
+    if (!isOrderingAllowed && !isTestMode) {
         return (
-            <div className="bg-white p-6 rounded-2xl shadow-xl space-y-4 text-center">
-                <h2 className="text-xl font-bold">Kasse noch geschlossen</h2>
-                <p className="text-sm">Wir nehmen Vorbestellungen für heute erst ab <strong>09:00 Uhr</strong> für Abholungen ab 10:30 Uhr entgegen.</p>
+            <div className="bg-white p-6 rounded-2xl shadow-xl space-y-4 text-center border border-red-100">
+                <span className="text-4xl">🕒</span>
+                <h2 className="text-xl font-bold">Kasse aktuell geschlossen</h2>
+                <p className="text-sm text-gray-600">
+                    Wir nehmen Bestellungen für heute von <strong>09:00 Uhr</strong> bis zum Ladenschluss entgegen.
+                </p>
             </div>
         );
     }
@@ -168,16 +227,32 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
         }
 
         let finalPickupTime: string;
+        const now = new Date();
+        const berlinNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+
         if (time === "ASAP") {
-            finalPickupTime = new Date(new Date().getTime() + 20 * 60000).toISOString();
+            finalPickupTime = new Date(berlinNow.getTime() + 20 * 60000).toISOString();
         } else if (time === "CUSTOM") {
             if (!customTime) {
                 alert("Bitte gib eine Uhrzeit ein.");
                 return;
             }
             const [hh, mm] = customTime.split(":").map(Number);
-            const d = new Date();
+            const d = new Date(berlinNow);
             d.setHours(hh, mm, 0, 0);
+            
+            // Final check against opening hours
+            if (openingHours) {
+                const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                const todayKey = days[d.getDay()];
+                const schedToday = openingHours[todayKey] || openingHours[todayKey.charAt(0).toUpperCase() + todayKey.slice(1)];
+                
+                const timeStr = hh.toString().padStart(2, '0') + ':' + mm.toString().padStart(2, '0');
+                if (schedToday?.open && (timeStr < schedToday.open || timeStr > schedToday.close)) {
+                    alert(`Die gewählte Zeit (${timeStr} Uhr) liegt außerhalb unserer heutigen Öffnungszeiten (${schedToday.open} - ${schedToday.close} Uhr).`);
+                    return;
+                }
+            }
             finalPickupTime = d.toISOString();
         } else {
             finalPickupTime = time;
