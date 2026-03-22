@@ -89,9 +89,45 @@ export const useCartStore = create<CartState>((set, get) => ({
         set((state) => ({ items: state.items.filter(i => i.id !== id) }));
     },
     updateItem: (id, modifiers, price) => {
-        set((state) => ({
-            items: state.items.map((item) => item.id === id ? { ...item, modifiers, price } : item)
-        }));
+        set((state) => {
+            const itemToUpdate = state.items.find((i) => i.id === id);
+            if (!itemToUpdate) return state;
+
+            // Create list of all other items + the original item reduced by 1
+            const otherItems = state.items
+                .map((i) => (i.id === id ? { ...i, quantity: i.quantity - 1 } : i))
+                .filter((i) => i.quantity > 0);
+
+            // Create a new entry for the one we modified (always quantity 1)
+            const updatedItem = {
+                ...itemToUpdate,
+                id: Math.random().toString(36).substring(7),
+                modifiers,
+                price,
+                quantity: 1,
+            };
+
+            // Check if the modified item can be merged with another existing entry
+            const existingMatch = otherItems.find(
+                (i) =>
+                    i.product_id === updatedItem.product_id &&
+                    JSON.stringify(i.modifiers) === JSON.stringify(updatedItem.modifiers)
+            );
+
+            if (existingMatch) {
+                return {
+                    items: otherItems.map((i) =>
+                        i.id === existingMatch.id
+                            ? { ...i, quantity: i.quantity + updatedItem.quantity }
+                            : i
+                    ),
+                };
+            }
+
+            return {
+                items: [...otherItems, updatedItem],
+            };
+        });
     },
     setItemQuantity: (id, quantity) => {
         set((state) => {

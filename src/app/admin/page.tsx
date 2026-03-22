@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState, useRef } from "react";
 
 export default function AdminDashboard() {
@@ -6,7 +6,6 @@ export default function AdminDashboard() {
     const [isAudioEnabled, setIsAudioEnabled] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const cancelAudioRef = useRef<HTMLAudioElement | null>(null);
-    const [deleteModalId, setDeleteModalId] = useState<string | null>(null);
     const [blacklistModalOrder, setBlacklistModalOrder] = useState<any>(null);
     const [isConnected, setIsConnected] = useState(true);
     const prevOrdersRef = useRef<any[]>([]);
@@ -275,7 +274,7 @@ export default function AdminDashboard() {
                                         </button>
                                     )}
                                     {order.status === 'CANCELLED' && (
-                                        <button onClick={() => setDeleteModalId(order.id)} className="flex-1 bg-red-800 hover:bg-red-900 active:bg-black active:scale-95 text-white text-lg font-bold py-3 rounded-lg transition-all shadow-sm">
+                                        <button onClick={() => deleteOrder(order.id)} className="flex-1 bg-red-800 hover:bg-red-900 active:bg-black active:scale-95 text-white text-lg font-bold py-3 rounded-lg transition-all shadow-sm">
                                             🗑️ Löschen (Erledigt)
                                         </button>
                                     )}
@@ -298,21 +297,6 @@ export default function AdminDashboard() {
                         )}
                     </div>
 
-                    {deleteModalId && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border-4 border-red-100">
-                                <div className="text-center">
-                                    <span className="text-5xl mb-4 block">🗑️</span>
-                                    <h3 className="text-2xl font-black text-gray-900 mb-2">Bon löschen?</h3>
-                                    <p className="text-gray-600 mb-8 font-medium">Bist du sicher, dass du diesen stornierten Bon endgültig aus der Kasse entfernen willst?</p>
-                                    <div className="flex gap-4">
-                                        <button onClick={() => setDeleteModalId(null)} className="flex-1 py-4 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">Abbrechen</button>
-                                        <button onClick={() => { deleteOrder(deleteModalId); setDeleteModalId(null); }} className="flex-1 py-4 font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-lg shadow-red-200">Endgültig löschen</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {blacklistModalOrder && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
