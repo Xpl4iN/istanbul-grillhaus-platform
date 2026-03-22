@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Product, CartItem, useCartStore } from "@/store/cartStore";
+import { Product, CartItem, useCartStore, ModifierGroup } from "@/store/cartStore";
 import Configurator from "./Configurator";
 import Checkout from "./Checkout";
 import { Caveat_Brush } from "next/font/google";
@@ -236,10 +236,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                             {Object.keys(item.modifiers).length > 0 && (
                                                 <ul className="text-[11px] mt-1 space-y-0.5 font-medium text-[#8b1a1a]/80">
                                                     {Object.entries(item.modifiers).flatMap(([groupId, modIds]) => {
-                                                        const group = [...(item.product.modifier_groups || []), ...(item.product as any).global_modifier_groups || []].find(g => g.id === groupId);
-                                                        if (!group) return [];
+                                                        const group = [...(item.product.modifier_groups || []), ...((item.product as any).global_modifier_groups || [])] as ModifierGroup[];
+                                                        const targetGroup = group.find(g => g.id === groupId);
+                                                        if (!targetGroup) return [];
                                                         return modIds.map(modId => {
-                                                            const mod = group.modifiers.find(m => m.id === modId);
+                                                            const mod = targetGroup.modifiers.find(m => m.id === modId);
                                                             return mod ? <li key={modId}>+ {mod.name}</li> : null;
                                                         });
                                                     })}

@@ -25,7 +25,7 @@ export type Product = {
     description: string;
     base_price: number;
     modifier_groups: ModifierGroup[];
-    category?: { name: string; sort_order: number };
+    category?: { id: string; name: string; sort_order: number };
     allergens?: string | null;
     additives?: string | null;
     deposit_amount?: number | null;
