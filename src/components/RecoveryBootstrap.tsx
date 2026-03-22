@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { getSupabaseClient } from '@/lib/supabase/client'
 
 /**
  * Intercepts Supabase password-recovery hash tokens on client bootstrap.
@@ -27,7 +27,7 @@ export default function RecoveryBootstrap() {
 
         if (!accessToken || !refreshToken) return
 
-        supabase.auth
+        getSupabaseClient().auth
             .setSession({ access_token: accessToken, refresh_token: refreshToken })
             .then(({ error }) => {
                 if (error) {

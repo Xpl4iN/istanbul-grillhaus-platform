@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 export default function ResetPassword() {
     const [password, setPassword] = useState("");
@@ -14,7 +14,7 @@ export default function ResetPassword() {
 
     // Verify that an active recovery session is present before showing the form
     useEffect(() => {
-        supabase.auth.getSession().then(({ data }) => {
+        getSupabaseClient().auth.getSession().then(({ data }) => {
             if (data.session) {
                 setSessionReady(true);
             } else {
@@ -38,7 +38,7 @@ export default function ResetPassword() {
 
         setLoading(true);
         try {
-            const { error: updateError } = await supabase.auth.updateUser({ password });
+            const { error: updateError } = await getSupabaseClient().auth.updateUser({ password });
             if (updateError) {
                 if (updateError.message.includes("expired") || updateError.message.includes("invalid")) {
                     setError("Der Link ist abgelaufen. Bitte fordere einen neuen Passwort-Reset-Link an.");

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
-import dynamic from "next/dynamic";
 import { Analytics } from "@vercel/analytics/react";
+import RecoveryBootstrap from "@/components/RecoveryBootstrap";
 import "./globals.css";
-
-// RecoveryBootstrap only runs in the browser (reads window.location.hash).
-// Loading it with ssr:false prevents the Supabase client module from being
-// evaluated server-side during prerendering, where env vars are not available.
-const RecoveryBootstrap = dynamic(() => import("@/components/RecoveryBootstrap"), { ssr: false });
 
 const inter = Inter({
   subsets: ["latin"],
