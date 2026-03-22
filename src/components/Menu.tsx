@@ -431,8 +431,8 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                                     <p className="text-[10px] mt-1 font-medium opacity-70" style={{ color: "#5c4a32" }}>Inkl. {p.deposit_amount.toFixed(2)} € Pfand</p>
                                                 )}
                                             </div>
-                                            <span className="shrink-0 font-black text-base py-0.5 transition-colors"
-                                                style={{ color: "#8b1a1a", minWidth: "60px", textAlign: "right" }}>
+                                            <span className="shrink-0 font-bold text-base px-2 py-0.5 rounded-md border border-[#8b1a1a] transition-colors"
+                                                style={{ color: "#8b1a1a", minWidth: "60px", textAlign: "center" }}>
                                                 {p.base_price.toFixed(2)} €
                                             </span>
                                         </div>

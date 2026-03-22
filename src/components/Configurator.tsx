@@ -76,9 +76,12 @@ export default function Configurator({ product, onClose, editCartItemId, initial
                 mods = mods.filter(m => (m as any).is_meat !== true)
             }
 
+            const isDrinkUpsell = group.name === 'Möchten Sie ein Getränk dazu?';
             return {
                 ...group,
-                modifiers: mods
+                modifiers: mods,
+                max_selections: isDrinkUpsell ? 99 : group.max_selections,
+                is_required: isDrinkUpsell ? false : group.is_required
             };
         }).filter(group => group.modifiers.length > 0); 
     }, [product, items, hideDrinkUpsell]);

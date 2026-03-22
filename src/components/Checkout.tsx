@@ -384,7 +384,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
 
             {/* Drink Upsell Popup */}
             {showDrinkUpsell && (
-                <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                     <div 
                         className={`bg-[#fffdf9] w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border-x-4 border-t-4 sm:border-b-4 border-[#8b1a1a] overflow-hidden transition-all duration-300 ease-out relative ${isDrinksExpanded ? 'max-h-[90vh] overflow-y-auto' : 'max-h-[40vh]'}`}
                         onClick={e => e.stopPropagation()}
@@ -395,7 +395,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
                                     setShowDrinkUpsell(false);
                                     setIsDrinksExpanded(false);
                                 }}
-                                className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-md text-[#8b1a1a] transition-colors"
+                                className="absolute top-6 right-6 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-md text-[#8b1a1a] transition-colors border border-[#8b1a1a]/20"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
@@ -414,7 +414,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
                                                 // Small delay to ensure the content is rendered before scrolling
                                                 setTimeout(() => {
                                                     const el = document.getElementById('upsell-question');
-                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 }, 100);
                                             }}
                                             className="w-full py-4 bg-[#8b1a1a] text-white font-bold rounded-2xl shadow-lg hover:bg-[#6e1313] transition-all active:scale-[0.98]"
@@ -438,32 +438,42 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-3">
-                                        {products.filter(p => p.is_drink).map(drink => (
-                                            <button
-                                                key={drink.id}
-                                                type="button"
-                                                onClick={() => {
-                                                    addItem({
-                                                        product: drink,
-                                                        product_id: drink.id,
-                                                        quantity: 1,
-                                                        price: drink.base_price,
-                                                        modifiers: {}
-                                                    });
-                                                    setShowDrinkUpsell(false);
-                                                    setIsDrinksExpanded(false);
-                                                }}
-                                                className="flex justify-between items-center p-4 bg-white border-2 border-[#ddd0b8] rounded-2xl hover:border-[#8b1a1a] transition-all group active:scale-[0.98]"
-                                            >
-                                                <div className="text-left flex-1">
-                                                    <div className="font-bold text-base text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
-                                                    {drink.deposit_amount && drink.deposit_amount > 0 && (
-                                                        <div className="text-[10px] opacity-60 font-medium">Inkl. {drink.deposit_amount.toFixed(2)} € Pfand</div>
-                                                    )}
-                                                </div>
-                                                <div className="font-black text-base text-[#8b1a1a] shrink-0">{drink.base_price.toFixed(2)} €</div>
-                                            </button>
-                                        ))}
+                                        {products.filter(p => p.is_drink).map(drink => {
+                                            const itemCount = items.filter(i => i.product_id === drink.id).reduce((sum, i) => sum + i.quantity, 0);
+                                            return (
+                                                <button
+                                                    key={drink.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        addItem({
+                                                            product: drink,
+                                                            product_id: drink.id,
+                                                            quantity: 1,
+                                                            price: drink.base_price,
+                                                            modifiers: {}
+                                                        });
+                                                    }}
+                                                    className={`flex justify-between items-center p-4 bg-white border-2 rounded-2xl transition-all group active:scale-[0.98] ${itemCount > 0 ? 'border-[#8b1a1a] bg-[#fffcfc]' : 'border-[#ddd0b8]'}`}
+                                                >
+                                                    <div className="text-left flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="font-bold text-base text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
+                                                            {itemCount > 0 && (
+                                                                <span className="bg-[#8b1a1a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                                                    {itemCount}x
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {drink.deposit_amount && drink.deposit_amount > 0 && (
+                                                            <div className="text-[10px] opacity-60 font-medium">Inkl. {drink.deposit_amount.toFixed(2)} € Pfand</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="shrink-0 font-bold text-base px-2 py-0.5 rounded-md border border-[#8b1a1a] text-[#8b1a1a] min-w-[60px] text-center">
+                                                        {drink.base_price.toFixed(2)} €
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
 
                                     <div className="pt-4 border-t border-[#ddd0b8]/50">
