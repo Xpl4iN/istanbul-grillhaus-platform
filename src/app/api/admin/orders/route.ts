@@ -30,7 +30,7 @@ export async function GET() {
             customerName: o.customer.name,
             phone: o.customer.phone_normalized,
             total_price: o.total_price,
-            pickup_time: new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(new Date(o.pickup_time)),
+            pickup_time: new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }).format(new Date(o.pickup_time)),
             status: o.status,
             dining_option: o.dining_option ?? null,
             payment_method: o.payment_method ?? null,
