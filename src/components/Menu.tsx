@@ -209,21 +209,28 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         ? "bg-green-50 border-green-200 text-green-800" 
                         : "bg-red-50 border-red-200 text-red-800"}`}>
                         
-                        <div className="flex flex-col items-center justify-center py-1">
-                            <div className="flex items-center gap-2">
+                        <div className="w-full flex justify-center py-1">
+                            {/* This container will be exactly as wide as the text, 
+                                centered in the parent. The icon will sit to its right. */}
+                            <div className="relative">
                                 <span className="text-xl font-black uppercase tracking-wider leading-none">
                                     {isCurrentlyOpen ? "Geöffnet" : "Geschlossen"}
                                 </span>
-                                <button 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowHoursModal(true);
-                                    }}
-                                    className={`p-1.5 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50 text-green-900" : "hover:bg-red-200/50 text-red-900"}`}
-                                    title="Alle Öffnungszeiten anzeigen"
-                                >
-                                    <Info className="w-5 h-5" />
-                                </button>
+                                
+                                {/* Absolute positioning ensures the text stays 
+                                    centered regardless of the icon's existence */}
+                                <div className="absolute left-full top-1/2 -translate-y-[55%] ml-2">
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowHoursModal(true);
+                                        }}
+                                        className={`p-1 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50 text-green-900" : "hover:bg-red-200/50 text-red-900"}`}
+                                        title="Alle Öffnungszeiten anzeigen"
+                                    >
+                                        <Info className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
