@@ -106,7 +106,7 @@ const formatOpeningHours = (hours: any) => {
         const startDay = dayLabels[group.days[0]];
         const endDay = dayLabels[group.days[group.days.length - 1]];
         const rangeLabel = group.days.length > 1 ? `${startDay}–${endDay}` : startDay;
-        return `${rangeLabel} ${group.hours}`;
+        return `${rangeLabel}: ${group.hours}`;
     }).join(' · ');
 
     return output || "Öffnungszeiten nicht verfügbar";

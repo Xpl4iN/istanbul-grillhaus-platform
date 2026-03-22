@@ -53,17 +53,33 @@ export default function Configurator({ product, onClose, editCartItemId, initial
             if (group.name === 'Möchten Sie ein Getränk dazu?') {
                 if (hasDrinkInCart || hideDrinkUpsell || product.is_drink) return false;
             }
+
+            // Meat choice logic: only show meat options if the product name or description contains meat-related terms
+            // This prevents "Welches Fleisch?" from appearing for standard pizzas (Margherita, Salami, etc.) unless they contain Döner/Sucuk.
+            if (group.name === 'Welches Fleisch?') {
+                const meatKeywords = ['döner', 'dürüm', 'sucuk', 'fleisch', 'kebab'];
+                const productName = product.name.toLowerCase();
+                const productDesc = (product.description || '').toLowerCase();
+                const isMeatProduct = meatKeywords.some(kw => productName.includes(kw) || productDesc.includes(kw));
+                
+                // If it's a meat product, check if there are any modifiers left besides the redactable ones
+                const availableMods = group.modifiers.filter((m: any) => !['Kalb', 'Gemischt'].includes(m.name));
+                if (!isMeatProduct || availableMods.length <= 1) return false;
+            }
             
             return true;
         }).map(group => {
             // Filter modifiers within the group (e.g. hide meat-specific mods for vegetarian)
+            let mods = (group.modifiers as any[]).filter(m => !['Kalb', 'Gemischt'].includes(m.name));
+            
             if (product.is_vegetarian) {
-                return {
-                    ...group,
-                    modifiers: group.modifiers.filter(m => (m as any).is_meat !== true)
-                };
+                mods = mods.filter(m => (m as any).is_meat !== true)
             }
-            return group;
+
+            return {
+                ...group,
+                modifiers: mods
+            };
         }).filter(group => group.modifiers.length > 0); 
     }, [product, items, hideDrinkUpsell]);
 
