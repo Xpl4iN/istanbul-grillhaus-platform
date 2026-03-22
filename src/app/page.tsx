@@ -4,6 +4,12 @@ import OrderTracker from "@/components/OrderTracker";
 import prisma from "@/lib/db";
 import { unstable_cache } from "next/cache";
 
+// DATABASE_URL is only available at request time, not during the static
+// prerender that Next.js performs at build time. Force dynamic rendering so
+// this page is always server-rendered on request; the unstable_cache wrapper
+// below still caches the Prisma queries for performance.
+export const dynamic = 'force-dynamic';
+
 const getMenuData = unstable_cache(
     async () => {
         const ISTANBUL_ORG_ID = 'cmmb6n8xu0001o7fwaw73p1lr';
