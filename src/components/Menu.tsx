@@ -220,7 +220,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 {/* Absolute positioning ensures the text stays 
                                     centered regardless of the icon's existence.
                                     Shifted 2px up from center: -calc(50% + 2px) */}
-                                <div className="absolute left-full top-1/2 -translate-y-[calc(50%+2px)] ml-2">
+                                <div className="absolute left-full top-1/2 -translate-y-[calc(50%+2px)] ml-1.5">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
