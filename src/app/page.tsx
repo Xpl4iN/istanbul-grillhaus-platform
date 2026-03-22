@@ -13,7 +13,6 @@ export const dynamic = 'force-dynamic';
 const getMenuData = unstable_cache(
     async () => {
         const ISTANBUL_ORG_ID = 'cmmb6n8xu0001o7fwaw73p1lr';
-        const ISTANBUL_SETTINGS_ID = 'cmmb6r26m000ro77865hy6nvu';
 
         const categories = await prisma.category.findMany({
             where: { organizationId: ISTANBUL_ORG_ID, is_active: true },
@@ -45,8 +44,8 @@ const getMenuData = unstable_cache(
             }))
         );
 
-        const settings = await prisma.shopSettings.findUnique({
-            where: { id: ISTANBUL_SETTINGS_ID }
+        const settings = await prisma.shopSettings.findFirst({
+            where: { organizationId: ISTANBUL_ORG_ID }
         });
 
         const org = await prisma.organization.findUnique({
