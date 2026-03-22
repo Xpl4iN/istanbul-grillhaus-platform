@@ -32,9 +32,6 @@
 
 html,
 body {
-  overflow-x: hidden;
-  max-width: 100vw;
-
   background: var(--bg-main);
   background-image:
     radial-gradient(ellipse at top, #ede5d0 0%, transparent 60%),

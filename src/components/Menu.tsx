@@ -209,15 +209,11 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         ? "bg-green-50 border-green-200 text-green-800" 
                         : "bg-red-50 border-red-200 text-red-800"}`}>
                         
-                        <div className="relative w-full flex items-center justify-center py-1">
-                            {/* Hidden spacer to balance the icon on the left for perfect centering */}
-                            <div className="w-8 h-8 invisible" aria-hidden="true" />
-                            
-                            <span className="text-xl font-black uppercase tracking-wider leading-none">
-                                {isCurrentlyOpen ? "Geöffnet" : "Geschlossen"}
-                            </span>
-                            
-                            <div className="w-8 h-8 flex items-center justify-center ml-1">
+                        <div className="flex flex-col items-center justify-center py-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xl font-black uppercase tracking-wider leading-none">
+                                    {isCurrentlyOpen ? "Geöffnet" : "Geschlossen"}
+                                </span>
                                 <button 
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -321,9 +317,9 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             )}
 
             {!showCheckout && (
-                <div className="sticky top-0 z-40 mb-6 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar py-3 shadow-md translate-y-[1px]"
-                    style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', width: '100vw' }}>
-                    <nav className="px-4 sm:px-6 flex gap-2">
+                <div className="sticky top-0 z-40 mb-6 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 shadow-md transform-gpu"
+                    style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', width: '100vw', overflowX: 'auto', scrollbarWidth: 'none' }}>
+                    <nav className="px-4 sm:px-6 py-3 flex justify-start md:justify-center gap-2 no-scrollbar">
                         {groupedProducts.map(group => (
                             <button
                                 key={group.categoryId}
