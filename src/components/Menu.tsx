@@ -76,6 +76,36 @@ const isStoreOpen = (hours: any) => {
     return currentTimeStr >= todayHours.open && currentTimeStr <= todayHours.close;
 };
 
+const formatOpeningHours = (hours: any) => {
+    if (!hours) return "";
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayLabels: Record<string, string> = {
+        monday: 'Mo', tuesday: 'Di', wednesday: 'Mi', thursday: 'Do', friday: 'Fr', saturday: 'Sa', sunday: 'So'
+    };
+
+    const groups: { days: string[]; hours: string }[] = [];
+    let currentGroup: { days: string[]; hours: string } | null = null;
+
+    days.forEach(day => {
+        const schedule = hours[day];
+        const hoursStr = schedule?.open && schedule?.close ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
+        
+        if (currentGroup && currentGroup.hours === hoursStr) {
+            currentGroup.days.push(day);
+        } else {
+            currentGroup = { days: [day], hours: hoursStr };
+            groups.push(currentGroup);
+        }
+    });
+
+    return groups.map(group => {
+        const startDay = dayLabels[group.days[0]];
+        const endDay = dayLabels[group.days[group.days.length - 1]];
+        const dayStr = group.days.length > 1 ? `${startDay}–${endDay}` : startDay;
+        return `${dayStr} ${group.hours}`;
+    }).join(' · ');
+};
+
 export default function Menu({ initialProducts = [], initialIsOpen = true, openingHours = null, features = {} }: { initialProducts?: Product[], initialIsOpen?: boolean, openingHours?: any, features?: any }) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -164,7 +194,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 {!isCurrentlyOpen ? (
                     <div className="p-4 rounded-xl text-center font-semibold text-sm border"
                         style={{ background: "#fdf0f0", borderColor: "#e8b4b4", color: "#7a1a1a" }}>
-                        🕒 Geschlossen · Öffnungszeiten: Mo–Sa 10:00–21:30 · So 10:00–21:00
+                        🕒 Geschlossen · Öffnungszeiten: {formatOpeningHours(openingHours)}
                     </div>
                 ) : (
                     <div className="p-3 rounded-xl text-center font-semibold text-xs border"

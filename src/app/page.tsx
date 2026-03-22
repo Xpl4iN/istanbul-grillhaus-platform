@@ -26,9 +26,17 @@ const getMenuData = unstable_cache(
             orderBy: { sort_order: 'asc' }
         });
 
-        // Flatten products for the Menu component, re-attaching the category
+        const globalGroups = await prisma.modifierGroup.findMany({
+            where: { is_global: true, organizationId: ISTANBUL_ORG_ID },
+            include: { modifiers: true }
+        });
+
         const products = categories.flatMap(c =>
-            c.products.map(p => ({ ...p, category: c }))
+            c.products.map(p => ({ 
+                ...p, 
+                category: c,
+                global_modifier_groups: globalGroups 
+            }))
         );
 
         const settings = await prisma.shopSettings.findUnique({
@@ -63,7 +71,7 @@ const getMenuData = unstable_cache(
         }
 
         return {
-            products: products.sort((a, b) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
+            products: (products as any).sort((a: any, b: any) => (a.category?.sort_order || 0) - (b.category?.sort_order || 0)),
             isOpen,
             openingHours,
             features

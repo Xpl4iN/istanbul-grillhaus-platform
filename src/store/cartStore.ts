@@ -1,9 +1,10 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 
 export type Modifier = {
     id: string;
     name: string;
     price_delta: number;
+    is_meat?: boolean;
 };
 
 export type ModifierGroup = {
@@ -12,6 +13,10 @@ export type ModifierGroup = {
     is_required: boolean;
     max_selections: number;
     modifiers: Modifier[];
+    applies_to_vegetarian?: boolean;
+    applies_to_meat?: boolean;
+    applies_to_drinks?: boolean;
+    is_global?: boolean;
 };
 
 export type Product = {
@@ -24,6 +29,8 @@ export type Product = {
     allergens?: string | null;
     additives?: string | null;
     deposit_amount?: number | null;
+    is_vegetarian: boolean;
+    is_drink: boolean;
 };
 
 export type CartItem = {

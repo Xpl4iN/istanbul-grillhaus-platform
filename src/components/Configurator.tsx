@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useMemo } from 'react';
 import { Product, ModifierGroup, useCartStore } from "@/store/cartStore";
 
@@ -29,20 +29,42 @@ export default function Configurator({ product, onClose, editCartItemId, initial
     const [selectedMods, setSelectedMods] = useState<Record<string, string[]>>(initialModifiers || {});
 
     const filteredModifierGroups = useMemo(() => {
+        const productGroups = product.modifier_groups || [];
+        const globalGroups = (product as any).global_modifier_groups || [];
+        
+        const allGroups = [...productGroups, ...globalGroups];
+
         const hasDrinkInCart = items.some(item => 
+            item.product.is_drink || 
             item.product.category?.name === 'Getränke' || 
             item.product.name.toLowerCase().includes('cola') ||
             item.product.name.toLowerCase().includes('fanta') ||
             item.product.name.toLowerCase().includes('ayran')
         );
 
-        return (product.modifier_groups || []).filter(group => {
-            if (group.name === 'Möchten Sie ein Getränk dazu?' && (hasDrinkInCart || hideDrinkUpsell)) {
-                return false;
+        return (allGroups as ModifierGroup[]).filter(group => {
+            // Respect global/explicit filters
+            if (product.is_vegetarian && group.applies_to_vegetarian === false) return false;
+            if (!product.is_vegetarian && group.applies_to_meat === false) return false;
+            if (product.is_drink && group.applies_to_drinks === false) return false;
+            
+            // Global drink upsell logic
+            if (group.name === 'Möchten Sie ein Getränk dazu?') {
+                if (hasDrinkInCart || hideDrinkUpsell || product.is_drink) return false;
             }
+            
             return true;
-        });
-    }, [product.modifier_groups, items, hideDrinkUpsell]);
+        }).map(group => {
+            // Filter modifiers within the group (e.g. hide "Extra Fleisch" for vegetarian)
+            if (product.is_vegetarian) {
+                return {
+                    ...group,
+                    modifiers: group.modifiers.filter(m => !m.is_meat)
+                };
+            }
+            return group;
+        }).filter(group => group.modifiers.length > 0); // Hide empty groups after filtering
+    }, [product, items, hideDrinkUpsell]);
 
     const modifierGroups = filteredModifierGroups;
 
@@ -50,8 +72,8 @@ export default function Configurator({ product, onClose, editCartItemId, initial
     const currentTotal = useMemo(() => {
         let total = Number(product.base_price);
         Object.values(selectedMods).flat().forEach(modId => {
-            const group = modifierGroups.find(g => g.modifiers.some(m => m.id === modId));
-            const modifier = group?.modifiers.find(m => m.id === modId);
+            const group = modifierGroups.find(g => g.modifiers.some((m: any) => m.id === modId));
+            const modifier = group?.modifiers.find((m: any) => m.id === modId);
             if (modifier) total += Number(modifier.price_delta);
         });
         return total;
@@ -131,7 +153,7 @@ export default function Configurator({ product, onClose, editCartItemId, initial
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-2">
-                                    {group.modifiers.map(modifier => {
+                                    {(group.modifiers as any[]).map((modifier: any) => {
                                         const isSelected = currentSelections.includes(modifier.id);
                                         const priceString = Number(modifier.price_delta) > 0 ? `+ ${Number(modifier.price_delta).toFixed(2)} €` : '';
 

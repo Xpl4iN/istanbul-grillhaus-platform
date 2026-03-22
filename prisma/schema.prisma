@@ -19,9 +19,6 @@ model Organization {
   orders       Order[]
   customers    Customer[]
   reviews      Review[]
-  shopSettings ShopSettings[]
-  reservations Reservation[]
-}
 
 model User {
   id             String        @id
@@ -62,6 +59,7 @@ model Product {
   is_vegetarian  Boolean @default(false)
   is_vegan       Boolean @default(false)
   is_spicy       Boolean @default(false)
+  is_drink       Boolean @default(false)
   allergens      String?
   additives      String?
   deposit_amount Float?
@@ -76,13 +74,21 @@ model Product {
 
 model ModifierGroup {
   id             String  @id @default(uuid())
-  product_id     String
+  product_id     String?
+  organizationId String?
   name           String
   is_required    Boolean @default(false)
   max_selections Int     @default(1)
 
-  product   Product    @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  modifiers Modifier[]
+  // New filters for global logic
+  applies_to_vegetarian Boolean @default(true)
+  applies_to_meat       Boolean @default(true)
+  applies_to_drinks     Boolean @default(false)
+  is_global             Boolean @default(false)
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  product      Product?      @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  modifiers    Modifier[]
 }
 
 model Modifier {
@@ -91,6 +97,7 @@ model Modifier {
   name         String
   price_delta  Float   @default(0.0)
   is_available Boolean @default(true)
+  is_meat      Boolean @default(false)
 
   group              ModifierGroup       @relation(fields: [group_id], references: [id], onDelete: Cascade)
   orderItemModifiers OrderItemModifier[]
