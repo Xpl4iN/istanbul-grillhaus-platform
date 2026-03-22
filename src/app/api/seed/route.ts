@@ -219,6 +219,18 @@ export async function GET(req: Request) {
             }
         });
 
+        // Ensure allowReviews feature flag is enabled
+        await prisma.organization.update({
+            where: { id: ISTANBUL_ORG_ID },
+            data: {
+                features: {
+                    allowReviews: true,
+                    allowPickup: true,
+                    allowDineIn: false
+                }
+            }
+        });
+
         return NextResponse.json({ success: true, message: "Database re-seeded with all missing items." });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });

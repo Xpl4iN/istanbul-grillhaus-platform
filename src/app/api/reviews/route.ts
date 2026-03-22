@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 // Simple in-memory rate limiter (per serverless instance)
 const reviewRateLimitMap = new Map<string, number[]>();
 
-function isRateLimited(ip: string): boolean {
+export function isRateLimited(ip: string): boolean {
     const now = Date.now();
     const windowMs = 60_000; // 1 minute
     const maxRequests = 5;
@@ -15,6 +15,28 @@ function isRateLimited(ip: string): boolean {
     timestamps.push(now);
     reviewRateLimitMap.set(ip, timestamps);
     return false;
+}
+
+/** GET /api/reviews - returns whether a review already exists for the current order session */
+export async function GET() {
+    try {
+        const cookieStore = await cookies();
+        const orderId = cookieStore.get("order_session")?.value;
+
+        if (!orderId) {
+            return NextResponse.json({ reviewed: false, hasOrder: false });
+        }
+
+        const existing = await prisma.review.findUnique({
+            where: { order_id: orderId },
+            select: { id: true, score: true }
+        });
+
+        return NextResponse.json({ reviewed: existing !== null, hasOrder: true, score: existing?.score ?? null });
+    } catch (e) {
+        console.error("Review GET error:", e);
+        return NextResponse.json({ reviewed: false, hasOrder: false });
+    }
 }
 
 export async function POST(req: Request) {
@@ -28,13 +50,24 @@ export async function POST(req: Request) {
         const orderId = cookieStore.get("order_session")?.value;
 
         if (!orderId) {
-            return NextResponse.json({ error: "Keine aktive Bestellung gefunden." }, { status: 400 });
+            return NextResponse.json({ error: "Keine aktive Bestellung gefunden. Bitte lade die Seite neu." }, { status: 401 });
         }
 
-        const { score, comment } = await req.json();
+        let body: unknown;
+        try {
+            body = await req.json();
+        } catch {
+            return NextResponse.json({ error: "Ungültiger Anfrage-Inhalt." }, { status: 400 });
+        }
+
+        if (typeof body !== "object" || body === null) {
+            return NextResponse.json({ error: "Ungültiger Anfrage-Inhalt." }, { status: 400 });
+        }
+
+        const { score, comment } = body as Record<string, unknown>;
 
         if (typeof score !== "number" || score < 1 || score > 5 || !Number.isInteger(score)) {
-            return NextResponse.json({ error: "Ungültige Bewertung. Bitte wähle 1–5 Sterne." }, { status: 400 });
+            return NextResponse.json({ error: "Ungültige Bewertung. Bitte wähle 1–5 Sterne." }, { status: 422 });
         }
 
         const order = await prisma.order.findUnique({
@@ -67,6 +100,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Für diese Bestellung wurde bereits eine Bewertung abgegeben." }, { status: 409 });
         }
         console.error("Review POST error:", e);
-        return NextResponse.json({ error: "Fehler beim Speichern der Bewertung." }, { status: 500 });
+        return NextResponse.json({ error: "Interner Fehler. Bitte versuche es später erneut." }, { status: 500 });
     }
 }

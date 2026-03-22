@@ -23,6 +23,29 @@ const ReviewPrompt = () => {
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [checking, setChecking] = useState(true);
+
+    useEffect(() => {
+        fetch("/api/reviews")
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.reviewed) setSubmitted(true);
+            })
+            .catch(() => { /* ignore - just show the form */ })
+            .finally(() => setChecking(false));
+    }, []);
+
+    const mapError = (status: number, serverMessage?: string): string => {
+        if (serverMessage) return serverMessage;
+        switch (status) {
+            case 401: return "Sitzung abgelaufen. Bitte lade die Seite neu.";
+            case 404: return "Bestellung nicht gefunden.";
+            case 409: return "Du hast bereits eine Bewertung für diese Bestellung abgegeben.";
+            case 422: return "Ungültige Eingabe. Bitte wähle 1–5 Sterne.";
+            case 429: return "Zu viele Versuche. Bitte warte kurz und versuche es erneut.";
+            default: return "Bewertung konnte nicht gespeichert werden. Bitte versuche es später erneut.";
+        }
+    };
 
     const handleSubmit = async () => {
         if (!rating || submitting || submitted) return;
@@ -38,14 +61,16 @@ const ReviewPrompt = () => {
                 setSubmitted(true);
             } else {
                 const data = await res.json().catch(() => ({}));
-                setError(data.error || "Bewertung konnte nicht gespeichert werden.");
+                setError(mapError(res.status, data.error));
             }
         } catch {
-            setError("Netzwerkfehler. Bitte versuche es erneut.");
+            setError("Netzwerkfehler. Bitte prüfe deine Verbindung und versuche es erneut.");
         } finally {
             setSubmitting(false);
         }
     };
+
+    if (checking) return null;
 
     if (submitted) {
         return (
