@@ -218,8 +218,9 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 </span>
 
                                 {/* Absolute positioning ensures the text stays 
-                                    centered regardless of the icon's existence */}
-                                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2">
+                                    centered regardless of the icon's existence.
+                                    Shifted 2px up from center: -calc(50% + 2px) */}
+                                <div className="absolute left-full top-1/2 -translate-y-[calc(50%+2px)] ml-2">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -228,23 +229,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                         className={`p-1 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50 text-green-900" : "hover:bg-red-200/50 text-red-900"}`}
                                         title="Alle Öffnungszeiten anzeigen"
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="24"
-                                            height="28"
-                                            viewBox="0 1 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="w-5 h-5"
-                                            aria-hidden="true"
-                                        >
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M12 16v-4"></path>
-                                            <path d="M12 8h.01"></path>
-                                        </svg>
+                                        <Info className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>
