@@ -1,7 +1,137 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export default function OrderTracker() {
+const StarIcon = ({ filled, hovered }: { filled: boolean; hovered: boolean }) => (
+    <svg
+        viewBox="0 0 24 24"
+        fill={filled || hovered ? "#c4860a" : "none"}
+        stroke={filled || hovered ? "#c4860a" : "#b8a080"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-8 h-8"
+        aria-hidden="true"
+    >
+        <path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5z" />
+    </svg>
+);
+
+const ReviewPrompt = () => {
+    const [rating, setRating] = useState(0);
+    const [hovered, setHovered] = useState(0);
+    const [comment, setComment] = useState("");
+    const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [checking, setChecking] = useState(true);
+
+    useEffect(() => {
+        fetch("/api/reviews")
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.reviewed) setSubmitted(true);
+            })
+            .catch(() => { /* ignore - just show the form */ })
+            .finally(() => setChecking(false));
+    }, []);
+
+    const mapError = (status: number, serverMessage?: string): string => {
+        if (serverMessage) return serverMessage;
+        switch (status) {
+            case 401: return "Sitzung abgelaufen. Bitte lade die Seite neu.";
+            case 404: return "Bestellung nicht gefunden.";
+            case 409: return "Du hast bereits eine Bewertung für diese Bestellung abgegeben.";
+            case 422: return "Ungültige Eingabe. Bitte wähle 1–5 Sterne.";
+            case 429: return "Zu viele Versuche. Bitte warte kurz und versuche es erneut.";
+            default: return "Bewertung konnte nicht gespeichert werden. Bitte versuche es später erneut.";
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!rating || submitting || submitted) return;
+        setSubmitting(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/reviews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ score: rating, ...(comment.trim() ? { comment: comment.trim() } : {}) })
+            });
+            if (res.ok || res.status === 409) {
+                setSubmitted(true);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                setError(mapError(res.status, data.error));
+            }
+        } catch {
+            setError("Netzwerkfehler. Bitte prüfe deine Verbindung und versuche es erneut.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (checking) return null;
+
+    if (submitted) {
+        return (
+            <div className="mt-4 mb-4 p-4 rounded-xl border text-center" style={{ background: "#f0fdf4", borderColor: "#b4e8c1" }}>
+                <p className="text-sm font-semibold" style={{ color: "#166534" }}>Danke für deine Bewertung!</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-2 mb-6 p-4 rounded-xl border" style={{ background: "#fffdf9", borderColor: "#ddd0b8" }}>
+            <p className="text-sm font-semibold mb-3 text-center" style={{ color: "#1a1008" }}>Wie war dein Erlebnis?</p>
+            <div className="flex justify-center gap-1" role="group" aria-label="Sternebewertung">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                        key={star}
+                        type="button"
+                        onClick={() => !submitting && setRating(star)}
+                        onMouseEnter={() => !submitting && setHovered(star)}
+                        onMouseLeave={() => setHovered(0)}
+                        onFocus={() => !submitting && setHovered(star)}
+                        onBlur={() => setHovered(0)}
+                        disabled={submitting}
+                        className="transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 rounded"
+                        aria-label={`${star} ${star === 1 ? "Stern" : "Sterne"}`}
+                        aria-pressed={rating === star}
+                    >
+                        <StarIcon filled={star <= rating} hovered={star <= hovered && hovered > 0} />
+                    </button>
+                ))}
+            </div>
+            {rating > 0 && (
+                <>
+                    <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        maxLength={500}
+                        rows={3}
+                        placeholder="Optionaler Kommentar (max. 500 Zeichen)"
+                        className="mt-3 w-full text-sm rounded-lg border px-3 py-2 resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+                        style={{ borderColor: "#ddd0b8", background: "#fffdf9", color: "#1a1008" }}
+                        disabled={submitting}
+                        aria-label="Kommentar zur Bewertung"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="mt-2 w-full py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ background: "#8b1a1a", color: "white" }}
+                    >
+                        {submitting ? "Wird gespeichert…" : "Bewertung absenden"}
+                    </button>
+                </>
+            )}
+            {error && <p className="text-xs text-center mt-2" style={{ color: "#991b1b" }}>{error}</p>}
+        </div>
+    );
+};
+
+export default function OrderTracker({ features = {} }: { features?: any }) {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
@@ -153,7 +283,13 @@ export default function OrderTracker() {
                             Vielen Dank für deinen Einkauf!
                         </p>
                     )}
+<<<<<<< HEAD
 
+=======
+                    {!isCancelled && features.allowReviews && (
+                        <ReviewPrompt />
+                    )}
+>>>>>>> 3489e6242769183348d74ca545abb1d42332057a
                     <button onClick={async () => {
                         await fetch("/api/orders/track", { method: "DELETE" });
                         setOrder(null);
@@ -178,12 +314,12 @@ export default function OrderTracker() {
                     {order.dining_option && (
                         <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-bold border"
                             style={{
-                                background: order.dining_option === "dine-in" ? "#eff6ff" : "#f0fdf4",
-                                borderColor: order.dining_option === "dine-in" ? "#bfdbfe" : "#bbf7d0",
-                                color: order.dining_option === "dine-in" ? "#1e40af" : "#166534"
+                                background: order.dining_option === "dine-in" ? "#eff6ff" : order.dining_option === "delivery" ? "#fef9c3" : "#f0fdf4",
+                                borderColor: order.dining_option === "dine-in" ? "#bfdbfe" : order.dining_option === "delivery" ? "#fde68a" : "#bbf7d0",
+                                color: order.dining_option === "dine-in" ? "#1e40af" : order.dining_option === "delivery" ? "#92400e" : "#166534"
                             }}
                         >
-                            {order.dining_option === "dine-in" ? "🍽️ Vor Ort essen" : "🏠 Zum Mitnehmen"}
+                            {order.dining_option === "dine-in" ? "🍽️ Vor Ort essen" : order.dining_option === "delivery" ? "🚗 Lieferung" : "🏠 Zum Mitnehmen"}
                         </span>
                     )}
                 </div>

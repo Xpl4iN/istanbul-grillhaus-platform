@@ -7,11 +7,12 @@
         "build": "prisma generate && next build",
         "start": "next start",
         "lint": "eslint",
-        "test": "echo \"No tests configured\" && exit 0"
+        "test": "vitest run"
     },
     "dependencies": {
         "@prisma/client": "^5.22.0",
         "@radix-ui/react-dialog": "^1.1.15",
+        "@vercel/analytics": "^2.0.1",
         "clsx": "^2.1.1",
         "libphonenumber-js": "^1.12.38",
         "lucide-react": "^0.575.0",
@@ -27,10 +28,12 @@
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@vitest/coverage-v8": "^4.1.0",
         "eslint": "^9",
         "eslint-config-next": "16.1.6",
         "prisma": "^5.22.0",
         "tailwindcss": "^4",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^4.1.0"
     }
 }

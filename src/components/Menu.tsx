@@ -137,6 +137,8 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     return (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20 pt-4">
             {/* Header */}
+            {/* TODO(customBranding): when features.customBranding is true, replace hardcoded name,
+                colours, and logo below with organisation-specific brand assets from the database. */}
             <header className="mb-6 rounded-2xl overflow-hidden shadow-2xl"
                 style={{ background: "linear-gradient(160deg,#0a5c45 0%,#096a50 50%,#074f3c 100%)", border: "3px solid #0d7a5e" }}>
                 <div className="px-8 pt-8 pb-4 text-center">

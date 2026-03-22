@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="de">
       <body className={`${inter.variable} antialiased`}>
         {children}
+        <Analytics />
         <Script id="qr-source-tracking" strategy="afterInteractive">
           {`
             (() => {

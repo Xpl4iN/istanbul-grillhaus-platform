@@ -23,23 +23,6 @@ model Organization {
   reservations Reservation[]
 }
 
-model Review {
-  id             String       @id @default(uuid())
-  organizationId String
-  order_id       String?
-  customer_id    String?
-  rating         Int
-  comment        String?
-  customer_name  String?
-  customer_phone String?
-  is_guest       Boolean      @default(false)
-  created_at     DateTime     @default(now())
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  @@index([organizationId])
-}
-
 model User {
   id             String        @id
   email          String        @unique
@@ -131,6 +114,7 @@ model Order {
   organization   Organization @relation(fields: [organizationId], references: [id])
   customer       Customer    @relation(fields: [customer_id], references: [id], onDelete: Restrict)
   items          OrderItem[]
+  review         Review?
 
   @@index([organizationId])
 }
@@ -166,6 +150,7 @@ model Customer {
   
   organization     Organization @relation(fields: [organizationId], references: [id])
   orders           Order[]
+  reviews          Review[]
 
   
   @@index([organizationId])
@@ -206,4 +191,18 @@ model ShopSettings {
   @@index([organizationId])
 }
 
+model Review {
+  id             String       @id @default(cuid())
+  organizationId String
+  order_id       String       @unique
+  customer_id    String?
+  score          Int
+  comment        String?
+  created_at     DateTime     @default(now())
 
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  order          Order        @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  customer       Customer?    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}

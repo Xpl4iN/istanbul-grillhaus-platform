@@ -35,7 +35,7 @@ export type CartItem = {
     modifiers: Record<string, string[]>; // { groupId: [modifierId, ...] }
 };
 
-export type DiningOption = 'takeaway' | 'dine-in' | null;
+export type DiningOption = 'takeaway' | 'dine-in' | 'delivery' | null;
 
 interface CartState {
     items: CartItem[];
