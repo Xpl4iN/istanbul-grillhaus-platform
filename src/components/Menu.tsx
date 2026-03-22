@@ -209,20 +209,26 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         ? "bg-green-50 border-green-200 text-green-800" 
                         : "bg-red-50 border-red-200 text-red-800"}`}>
                         
-                        <div className="flex items-center gap-2">
-                            <span className="text-xl font-black uppercase tracking-wider flex items-center gap-2 leading-none">
+                        <div className="relative w-full flex items-center justify-center py-1">
+                            {/* Hidden spacer to balance the icon on the left for perfect centering */}
+                            <div className="w-8 h-8 invisible" aria-hidden="true" />
+                            
+                            <span className="text-xl font-black uppercase tracking-wider leading-none">
                                 {isCurrentlyOpen ? "Geöffnet" : "Geschlossen"}
                             </span>
-                            <button 
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowHoursModal(true);
-                                }}
-                                className={`p-1.5 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50" : "hover:bg-red-200/50"}`}
-                                title="Alle Öffnungszeiten anzeigen"
-                            >
-                                <Info className="w-5 h-5" />
-                            </button>
+                            
+                            <div className="w-8 h-8 flex items-center justify-center ml-1">
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowHoursModal(true);
+                                    }}
+                                    className={`p-1.5 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50 text-green-900" : "hover:bg-red-200/50 text-red-900"}`}
+                                    title="Alle Öffnungszeiten anzeigen"
+                                >
+                                    <Info className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="text-sm font-bold opacity-90 leading-none">
@@ -249,11 +255,21 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 )}
             </div>
 
+            <style jsx global>{`
+                @keyframes zoomIn {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .animate-zoom-in {
+                    animation: zoomIn 0.2s ease-out forwards;
+                }
+            `}</style>
+
             {/* Opening Hours Modal */}
             {showHoursModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all"
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                     onClick={() => setShowHoursModal(false)}>
-                    <div className="bg-[#fffdf9] rounded-3xl shadow-2xl w-full max-w-sm border-4 border-[#0a5c45] overflow-hidden animate-in zoom-in-95 duration-200"
+                    <div className="bg-[#fffdf9] rounded-3xl shadow-2xl w-full max-w-sm border-4 border-[#0a5c45] overflow-hidden animate-zoom-in"
                         onClick={e => e.stopPropagation()}>
                         <div className="bg-[#0a5c45] p-6 text-white flex justify-between items-center">
                             <h3 className="text-2xl font-black italic tracking-tight">Öffnungszeiten</h3>
@@ -305,7 +321,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             )}
 
             {!showCheckout && (
-                <div className="sticky top-[-1px] z-40 mb-6 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar py-3 shadow-md"
+                <div className="sticky top-0 z-40 mb-6 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar py-3 shadow-md translate-y-[1px]"
                     style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', width: '100vw' }}>
                     <nav className="px-4 sm:px-6 flex gap-2">
                         {groupedProducts.map(group => (
