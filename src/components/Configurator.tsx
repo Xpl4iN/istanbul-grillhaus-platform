@@ -139,11 +139,11 @@ export default function Configurator({ product, onClose, editCartItemId, initial
             <div className="bg-[#fffdf9] w-full sm:w-[500px] h-[90vh] sm:h-auto sm:max-h-[85vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden border-t-4 border-[#8b1a1a]">
                 <div className="p-6 border-b border-[#ddd0b8]/50 flex justify-between items-start">
                     <div>
-                        <h2 className="text-2xl font-bold text-[#1a1008]">
+                        <h2 className="text-base font-bold text-[#1a1008]">
                             {product.name}
                             <ProductSuperscript allergens={product.allergens} additives={product.additives} />
                         </h2>
-                        <p className="text-[#5c4a32] text-lg mt-0.5">{product.description}</p>
+                        <p className="text-[#5c4a32] text-sm mt-0.5">{product.description}</p>
                         {product.deposit_amount && product.deposit_amount > 0 && (
                             <p className="text-[10px] mt-1 font-bold opacity-70" style={{ color: "#8b1a1a" }}>
                                 Inkl. {product.deposit_amount.toFixed(2)} € Pfand
