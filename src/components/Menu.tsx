@@ -189,8 +189,12 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 </div>
                 <div className="flex justify-center gap-4 flex-wrap text-sm px-6 py-3"
                     style={{ background: "rgba(0,0,0,0.25)", color: "#a8d5c0" }}>
-                    <span>📍 Münchener Str. 9, Weilheim</span>
-                    <span>📞 0881 92706810</span>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Istanbul+Grillhaus+Weilheim+Münchener+Str.+9" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                        📍 Münchener Str. 9, Weilheim
+                    </a>
+                    <a href="tel:088192706810" className="hover:text-white transition-colors">
+                        📞 0881 92706810
+                    </a>
                     <span>🥩 100% Halal</span>
                 </div>
             </header>
@@ -206,22 +210,22 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         : "bg-red-50 border-red-200 text-red-800"}`}>
                         
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5">
-                                {isCurrentlyOpen ? "✅ Geöffnet" : "🕒 Geschlossen"}
+                            <span className="text-xl font-black uppercase tracking-wider flex items-center gap-2 leading-none">
+                                {isCurrentlyOpen ? "Geöffnet" : "Geschlossen"}
                             </span>
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setShowHoursModal(true);
                                 }}
-                                className={`p-1 rounded-full transition-colors ${isCurrentlyOpen ? "hover:bg-green-200/50" : "hover:bg-red-200/50"}`}
+                                className={`p-1.5 rounded-full transition-colors flex items-center justify-center ${isCurrentlyOpen ? "hover:bg-green-200/50" : "hover:bg-red-200/50"}`}
                                 title="Alle Öffnungszeiten anzeigen"
                             >
-                                <Info className="w-4 h-4" />
+                                <Info className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="text-xs font-bold opacity-90">
+                        <div className="text-sm font-bold opacity-90 leading-none">
                             {(() => {
                                 if (!openingHours) return "Öffnungszeiten nicht verfügbar";
                                 const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -249,7 +253,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             {showHoursModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all"
                     onClick={() => setShowHoursModal(false)}>
-                    <div className="bg-[#fffdf9] rounded-3xl shadow-2xl w-full max-w-sm border-4 border-[#0a5c45] overflow-hidden"
+                    <div className="bg-[#fffdf9] rounded-3xl shadow-2xl w-full max-w-sm border-4 border-[#0a5c45] overflow-hidden animate-in zoom-in-95 duration-200"
                         onClick={e => e.stopPropagation()}>
                         <div className="bg-[#0a5c45] p-6 text-white flex justify-between items-center">
                             <h3 className="text-2xl font-black italic tracking-tight">Öffnungszeiten</h3>
@@ -294,22 +298,21 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                             onClick={() => setShowHoursModal(false)}
                             className="w-full bg-[#0a5c45] text-white font-black py-4 hover:bg-[#074f3c] transition-colors uppercase tracking-widest text-sm"
                         >
-                            Schließen
+                            Fertig
                         </button>
                     </div>
                 </div>
             )}
 
             {!showCheckout && (
-                <div className="sticky top-0 z-40 mb-6"
+                <div className="sticky top-[-1px] z-40 mb-6 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar py-3 shadow-md"
                     style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', width: '100vw' }}>
-                    <nav className="px-4 sm:px-6 py-3 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <nav className="px-4 sm:px-6 flex gap-2">
                         {groupedProducts.map(group => (
                             <button
                                 key={group.categoryId}
                                 onClick={() => scrollToCategory(group.categoryId)}
-                                className="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 border"
+                                className="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 border shrink-0"
                                 style={{ background: "#fffdf9", borderColor: "#ddd0b8", color: "#5c4a32", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
                             >
                                 {iconFor(group.categoryName)} {group.categoryName}
