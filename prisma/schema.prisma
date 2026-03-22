@@ -13,12 +13,16 @@ model Organization {
   slug     String @unique
   features Json   @default("{}") // e.g. { "online_payments": true, "table_management": true }
 
-  users        User[]
-  categories   Category[]
-  products     Product[]
-  orders       Order[]
-  customers    Customer[]
-  reviews      Review[]
+  users           User[]
+  categories      Category[]
+  products        Product[]
+  orders          Order[]
+  customers       Customer[]
+  reviews         Review[]
+  shopSettings    ShopSettings[]
+  reservations    Reservation[]
+  modifier_groups ModifierGroup[]
+}
 
 model User {
   id             String        @id
