@@ -65,9 +65,25 @@ export const useCartStore = create<CartState>((set, get) => ({
     toggleTestMode: () => set((state) => ({ isTestMode: !state.isTestMode })),
     setDiningOption: (option) => set({ diningOption: option }),
     addItem: (item) => {
-        set((state) => ({
-            items: [...state.items, { ...item, id: Math.random().toString(36).substring(7) }]
-        }));
+        set((state) => {
+            const existingItem = state.items.find(i => 
+                i.product_id === item.product_id && 
+                JSON.stringify(i.modifiers) === JSON.stringify(item.modifiers)
+            );
+
+            if (existingItem) {
+                return {
+                    items: state.items.map(i => 
+                        i.id === existingItem.id 
+                            ? { ...i, quantity: i.quantity + item.quantity } 
+                            : i
+                    )
+                };
+            }
+            return {
+                items: [...state.items, { ...item, id: Math.random().toString(36).substring(7) }]
+            };
+        });
     },
     removeItem: (id) => {
         set((state) => ({ items: state.items.filter(i => i.id !== id) }));

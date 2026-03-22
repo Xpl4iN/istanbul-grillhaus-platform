@@ -439,39 +439,65 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
 
                                     <div className="grid grid-cols-1 gap-3">
                                         {products.filter(p => p.is_drink).map(drink => {
-                                            const itemCount = items.filter(i => i.product_id === drink.id).reduce((sum, i) => sum + i.quantity, 0);
+                                            const existingItems = items.filter(i => 
+                                                i.product_id === drink.id && 
+                                                Object.keys(i.modifiers).length === 0
+                                            );
+                                            const itemCount = existingItems.reduce((sum, i) => sum + i.quantity, 0);
+                                            
                                             return (
-                                                <button
+                                                <div 
                                                     key={drink.id}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        addItem({
-                                                            product: drink,
-                                                            product_id: drink.id,
-                                                            quantity: 1,
-                                                            price: drink.base_price,
-                                                            modifiers: {}
-                                                        });
-                                                    }}
-                                                    className={`flex justify-between items-center p-4 bg-white border-2 rounded-2xl transition-all group active:scale-[0.98] ${itemCount > 0 ? 'border-[#8b1a1a] bg-[#fffcfc]' : 'border-[#ddd0b8]'}`}
+                                                    className={`flex items-stretch gap-2 transition-all active:scale-[0.98] ${itemCount > 0 ? 'scale-[1.02]' : ''}`}
                                                 >
-                                                    <div className="text-left flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="font-bold text-base text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
-                                                            {itemCount > 0 && (
-                                                                <span className="bg-[#8b1a1a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                                                                    {itemCount}x
-                                                                </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            addItem({
+                                                                product: drink,
+                                                                product_id: drink.id,
+                                                                quantity: 1,
+                                                                price: drink.base_price,
+                                                                modifiers: {}
+                                                            });
+                                                        }}
+                                                        className={`flex-1 flex justify-between items-center p-4 bg-white border-2 rounded-2xl transition-all group ${itemCount > 0 ? 'border-[#8b1a1a] bg-[#fffcfc]' : 'border-[#ddd0b8]'}`}
+                                                    >
+                                                        <div className="text-left flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="font-bold text-base text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
+                                                                {itemCount > 0 && (
+                                                                    <span className="bg-[#8b1a1a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-in zoom-in duration-200">
+                                                                        {itemCount}x
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            {drink.deposit_amount && drink.deposit_amount > 0 && (
+                                                                <div className="text-[10px] opacity-60 font-medium">Inkl. {drink.deposit_amount.toFixed(2)} € Pfand</div>
                                                             )}
                                                         </div>
-                                                        {drink.deposit_amount && drink.deposit_amount > 0 && (
-                                                            <div className="text-[10px] opacity-60 font-medium">Inkl. {drink.deposit_amount.toFixed(2)} € Pfand</div>
-                                                        )}
-                                                    </div>
-                                                    <div className="shrink-0 font-bold text-base px-2 py-0.5 rounded-md border border-[#8b1a1a] text-[#8b1a1a] min-w-[60px] text-center">
-                                                        {drink.base_price.toFixed(2)} €
-                                                    </div>
-                                                </button>
+                                                        <div className="shrink-0 font-bold text-base px-2 py-0.5 rounded-md border border-[#8b1a1a] text-[#8b1a1a] min-w-[60px] text-center">
+                                                            {drink.base_price.toFixed(2)} €
+                                                        </div>
+                                                    </button>
+                                                    
+                                                    {itemCount > 0 && (
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const lastItem = [...existingItems].reverse()[0];
+                                                                if (lastItem) {
+                                                                    const { setItemQuantity } = useCartStore.getState();
+                                                                    setItemQuantity(lastItem.id, lastItem.quantity - 1);
+                                                                }
+                                                            }}
+                                                            className="px-4 bg-[#fdf0f0] border-2 border-[#e8b4b4] text-[#7a1a1a] rounded-2xl hover:bg-[#7a1a1a] hover:text-white hover:border-[#7a1a1a] transition-all flex items-center justify-center font-black text-xl"
+                                                            aria-label="Entfernen"
+                                                        >
+                                                            −
+                                                        </button>
+                                                    )}
+                                                </div>
                                             );
                                         })}
                                     </div>

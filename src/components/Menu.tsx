@@ -503,7 +503,9 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         className="pointer-events-auto w-full max-w-sm flex items-center justify-between py-4 px-6 text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
                         style={{ background: "linear-gradient(135deg,#8b1a1a 0%,#6b1414 100%)", boxShadow: "0 8px 24px rgba(139,26,26,0.35)" }}>
                         <div className="flex items-center gap-3">
-                            <span className="text-sm px-2 py-0.5 rounded-md font-bold" style={{ background: "rgba(255,255,255,0.2)" }}>{items.length}</span>
+                            <span className="text-sm px-2 py-0.5 rounded-md font-bold" style={{ background: "rgba(255,255,255,0.2)" }}>
+                                {items.reduce((sum, item) => sum + item.quantity, 0)}
+                            </span>
                             <span>Warenkorb & Kasse</span>
                         </div>
                         <span className="text-lg font-bold">{getTotal().toFixed(2)} €</span>
