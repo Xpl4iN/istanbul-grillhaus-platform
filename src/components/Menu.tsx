@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo, useRef } from "react";
+import { Info, X } from "lucide-react";
 import { Product, CartItem, useCartStore, ModifierGroup } from "@/store/cartStore";
 import Configurator from "./Configurator";
 import Checkout from "./Checkout";
@@ -82,7 +83,6 @@ const isStoreOpen = (hours: any) => {
 const formatOpeningHours = (hours: any) => {
     if (!hours) return "Öffnungszeiten nicht hinterlegt";
     
-    // Normalize keys to title case for the days array
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const dayLabels: Record<string, string> = {
         'Monday': 'Mo', 'Tuesday': 'Di', 'Wednesday': 'Mi', 'Thursday': 'Do', 'Friday': 'Fr', 'Saturday': 'Sa', 'Sunday': 'So'
@@ -92,7 +92,6 @@ const formatOpeningHours = (hours: any) => {
     let currentGroup: { days: string[]; hours: string } | null = null;
 
     dayNames.forEach(day => {
-        // Try both "Monday" and "monday"
         const schedule = hours[day] || hours[day.toLowerCase()];
         const hoursStr = (schedule?.open && schedule?.close) ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
         
@@ -104,14 +103,12 @@ const formatOpeningHours = (hours: any) => {
         }
     });
 
-    const output = groups.map(group => {
+    return groups.map(group => {
         const startDay = dayLabels[group.days[0]];
         const endDay = dayLabels[group.days[group.days.length - 1]];
         const rangeLabel = group.days.length > 1 ? `${startDay}–${endDay}` : startDay;
         return `${rangeLabel}: ${group.hours}`;
     }).join(' · ');
-
-    return output || "Öffnungszeiten nicht verfügbar";
 };
 
 export default function Menu({ initialProducts = [], initialIsOpen = true, openingHours = null, features = {} }: { initialProducts?: Product[], initialIsOpen?: boolean, openingHours?: any, features?: any }) {
@@ -121,15 +118,29 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     const [isOpen, setIsOpen] = useState(initialIsOpen);
     const [showLMIVModal, setShowLMIVModal] = useState(false);
     const [editingCartItem, setEditingCartItem] = useState<Pick<CartItem, 'id' | 'product' | 'modifiers'> | null>(null);
+    const [showHoursModal, setShowHoursModal] = useState(false);
     const { items, getTotal, removeItem, setItemQuantity, isTestMode } = useCartStore();
 
     // Update isOpen state based on actual business hours
+    const [mounted, setMounted] = useState(false);
+    const [currentTime, setCurrentTime] = useState<string>("");
+
     useEffect(() => {
-        const updateOpenStatus = () => {
+        setMounted(true);
+        const update = () => {
+            const now = new Date();
+            const berlinTime = new Intl.DateTimeFormat('de-DE', {
+                timeZone: 'Europe/Berlin',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).format(now);
+            setCurrentTime(berlinTime);
+            
             setIsOpen(isStoreOpen(openingHours));
         };
-        updateOpenStatus();
-        const interval = setInterval(updateOpenStatus, 60000);
+        update();
+        const interval = setInterval(update, 60000);
         return () => clearInterval(interval);
     }, [openingHours]);
 
@@ -185,18 +196,109 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
             </header>
 
             <div className="mb-4">
-                {!isCurrentlyOpen ? (
-                    <div className="p-4 rounded-xl text-center font-semibold text-sm border"
-                        style={{ background: "#fdf0f0", borderColor: "#e8b4b4", color: "#7a1a1a" }}>
-                        🕒 Geschlossen · Öffnungszeiten: {formatOpeningHours(openingHours)}
+                {!mounted ? (
+                    <div className="p-4 rounded-xl text-center font-semibold text-sm border bg-gray-50 border-gray-200 text-gray-400">
+                        Lade Status...
                     </div>
                 ) : (
-                    <div className="p-3 rounded-xl text-center font-semibold text-xs border"
-                        style={{ background: "#f0fdf4", borderColor: "#b4e8c1", color: "#1a7a3a" }}>
-                        ✅ Geöffnet · Jetzt vorbestellen & abholen
+                    <div className={`p-4 rounded-xl border flex flex-col items-center gap-1 shadow-sm transition-all ${isCurrentlyOpen 
+                        ? "bg-green-50 border-green-200 text-green-800" 
+                        : "bg-red-50 border-red-200 text-red-800"}`}>
+                        
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5">
+                                {isCurrentlyOpen ? "✅ Geöffnet" : "🕒 Geschlossen"}
+                            </span>
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowHoursModal(true);
+                                }}
+                                className={`p-1 rounded-full transition-colors ${isCurrentlyOpen ? "hover:bg-green-200/50" : "hover:bg-red-200/50"}`}
+                                title="Alle Öffnungszeiten anzeigen"
+                            >
+                                <Info className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="text-xs font-bold opacity-90">
+                            {(() => {
+                                if (!openingHours) return "Öffnungszeiten nicht verfügbar";
+                                const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                                const now = new Date();
+                                const currentDayIdx = now.getDay();
+                                
+                                if (isCurrentlyOpen) {
+                                    const today = days[currentDayIdx];
+                                    const sched = openingHours[today] || openingHours[today.charAt(0).toUpperCase() + today.slice(1)];
+                                    return `Heute: ${sched?.open || '--:--'} – ${sched?.close || '--:--'} Uhr`;
+                                } else {
+                                    const tomorrowIdx = (currentDayIdx + 1) % 7;
+                                    const tomorrow = days[tomorrowIdx];
+                                    const sched = openingHours[tomorrow] || openingHours[tomorrow.charAt(0).toUpperCase() + tomorrow.slice(1)];
+                                    const dayName = tomorrowIdx === 1 ? 'Montag' : tomorrowIdx === 2 ? 'Dienstag' : tomorrowIdx === 3 ? 'Mittwoch' : tomorrowIdx === 4 ? 'Donnerstag' : tomorrowIdx === 5 ? 'Freitag' : tomorrowIdx === 6 ? 'Samstag' : 'Sonntag';
+                                    return `Morgen (${dayName}): ${sched?.open || '--:--'} – ${sched?.close || '--:--'} Uhr`;
+                                }
+                            })()}
+                        </div>
                     </div>
                 )}
             </div>
+
+            {/* Opening Hours Modal */}
+            {showHoursModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all"
+                    onClick={() => setShowHoursModal(false)}>
+                    <div className="bg-[#fffdf9] rounded-3xl shadow-2xl w-full max-w-sm border-4 border-[#0a5c45] overflow-hidden"
+                        onClick={e => e.stopPropagation()}>
+                        <div className="bg-[#0a5c45] p-6 text-white flex justify-between items-center">
+                            <h3 className="text-2xl font-black italic tracking-tight">Öffnungszeiten</h3>
+                            <button onClick={() => setShowHoursModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-3">
+                            {(() => {
+                                const days = [
+                                    { key: 'monday', label: 'Montag' },
+                                    { key: 'tuesday', label: 'Dienstag' },
+                                    { key: 'wednesday', label: 'Mittwoch' },
+                                    { key: 'thursday', label: 'Donnerstag' },
+                                    { key: 'friday', label: 'Freitag' },
+                                    { key: 'saturday', label: 'Samstag' },
+                                    { key: 'sunday', label: 'Sonntag' }
+                                ];
+                                const now = new Date();
+                                const todayIdx = now.getDay(); // 0 is Sunday
+                                const adjustedTodayIdx = todayIdx === 0 ? 6 : todayIdx - 1;
+
+                                return days.map((day, idx) => {
+                                    const sched = openingHours?.[day.key] || openingHours?.[day.key.charAt(0).toUpperCase() + day.key.slice(1)];
+                                    const isToday = idx === adjustedTodayIdx;
+                                    
+                                    return (
+                                        <div key={day.key} 
+                                            className={`flex justify-between items-center p-3 rounded-xl transition-all ${isToday 
+                                                ? "bg-green-100 border-2 border-green-500 scale-[1.02] shadow-sm" 
+                                                : "bg-[#f5f0e8]/50 text-gray-700"}`}>
+                                            <span className={`font-bold ${isToday ? "text-green-900" : ""}`}>{day.label}</span>
+                                            <span className={`font-black ${isToday ? "text-green-700" : "opacity-80"}`}>
+                                                {sched?.open && sched?.close ? `${sched.open} – ${sched.close}` : 'Geschlossen'}
+                                            </span>
+                                        </div>
+                                    );
+                                });
+                            })()}
+                        </div>
+                        <button 
+                            onClick={() => setShowHoursModal(false)}
+                            className="w-full bg-[#0a5c45] text-white font-black py-4 hover:bg-[#074f3c] transition-colors uppercase tracking-widest text-sm"
+                        >
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {!showCheckout && (
                 <div className="sticky top-0 z-40 mb-6"
