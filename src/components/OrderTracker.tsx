@@ -253,7 +253,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                         <div className="text-center">
                             <h3 className="text-2xl font-black mb-2" style={{ color: "#1a1008" }}>Bestellung stornieren?</h3>
                             <p className="mb-8 font-medium" style={{ color: "#5c4a32" }}>
-                                Möchtest du deine Bestellung wirklich stornieren? Dieser Vorgang kann nicht rükgängig gemacht werden.
+                                Möchtest du deine Bestellung wirklich stornieren? Dieser Vorgang kann nicht rückgängig gemacht werden.
                             </p>
                             <div className="flex gap-4">
                                 <button
