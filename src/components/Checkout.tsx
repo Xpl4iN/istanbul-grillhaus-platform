@@ -42,8 +42,8 @@ const PAYMENT_METHOD_CONFIG: Record<string, { icon: string; label: string; subla
     online: { icon: "🌐", label: "Sicher online bezahlen", sublabel: "Sichere Zahlung im Voraus" },
 };
 
-export default function Checkout({ onComplete, features = {} }: { onComplete: () => void, features?: any }) {
-    const { items, getTotal, clearCart, isTestMode, diningOption, setDiningOption } = useCartStore();
+export default function Checkout({ onComplete, features = {}, products = [] }: { onComplete: () => void, features?: any, products?: any[] }) {
+    const { items, getTotal, clearCart, isTestMode, diningOption, setDiningOption, addItem } = useCartStore();
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [time, setTime] = useState("");
@@ -52,6 +52,9 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [tip, setTip] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+
+    const [showDrinkUpsell, setShowDrinkUpsell] = useState(false);
+    const [isDrinksExpanded, setIsDrinksExpanded] = useState(false);
 
     const allowPickup = features.allowPickup ?? true;
     const allowDineIn = features.allowDineIn ?? false;
@@ -141,8 +144,16 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
         );
     }
 
-    const handleOrder = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleOrder = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+
+        // Check for drinks - only trigger upsell if no drinks are in cart
+        const hasDrink = items.some(i => i.product.is_drink);
+        if (!hasDrink && !showDrinkUpsell) {
+            setShowDrinkUpsell(true);
+            return;
+        }
+
         if (!diningOption) {
             alert("Bitte wählen Sie, ob Sie Vor-Ort essen oder mitnehmen möchten.");
             return;
@@ -370,6 +381,106 @@ export default function Checkout({ onComplete, features = {} }: { onComplete: ()
                     {isSubmitting ? "Wird gesendet..." : `Kostenpflichtig bestellen (${(getTotal() + tip).toFixed(2)} €)`}
                 </button>
             </form>
+
+            {/* Drink Upsell Popup */}
+            {showDrinkUpsell && (
+                <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div 
+                        className={`bg-[#fffdf9] w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border-x-4 border-t-4 sm:border-b-4 border-[#8b1a1a] overflow-hidden transition-all duration-300 ease-out relative ${isDrinksExpanded ? 'max-h-[90vh] overflow-y-auto' : 'max-h-[40vh]'}`}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {isDrinksExpanded && (
+                            <button 
+                                onClick={() => {
+                                    setShowDrinkUpsell(false);
+                                    setIsDrinksExpanded(false);
+                                }}
+                                className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-md text-[#8b1a1a] transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        )}
+
+                        <div className="p-8 space-y-6">
+                            {!isDrinksExpanded ? (
+                                <div className="text-center space-y-6 py-4">
+                                    <div className="text-4xl">🥤✨</div>
+                                    <h3 className="text-2xl font-black text-[#8b1a1a] leading-tight">Noch ein Getränk dazu?</h3>
+                                    <div className="flex flex-col gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsDrinksExpanded(true);
+                                                // Small delay to ensure the content is rendered before scrolling
+                                                setTimeout(() => {
+                                                    const el = document.getElementById('upsell-question');
+                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }, 100);
+                                            }}
+                                            className="w-full py-4 bg-[#8b1a1a] text-white font-bold rounded-2xl shadow-lg hover:bg-[#6e1313] transition-all active:scale-[0.98]"
+                                        >
+                                            Ja, gerne
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOrder()}
+                                            className="w-full py-3 text-[#5c4a32] font-semibold hover:bg-[#fdf5ee] rounded-2xl transition-colors text-sm"
+                                        >
+                                            Nein danke, Kostenpflichtig bestellen ({(getTotal() + tip).toFixed(2)} €)
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-6 pb-4">
+                                    <div id="upsell-question" className="text-center space-y-2 pt-4">
+                                        <div className="text-3xl">🥤</div>
+                                        <h3 className="text-xl font-black text-[#8b1a1a]">Welches Getränk darf's sein?</h3>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {products.filter(p => p.is_drink).map(drink => (
+                                            <button
+                                                key={drink.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    addItem({
+                                                        product: drink,
+                                                        product_id: drink.id,
+                                                        quantity: 1,
+                                                        price: drink.base_price,
+                                                        modifiers: {}
+                                                    });
+                                                    setShowDrinkUpsell(false);
+                                                    setIsDrinksExpanded(false);
+                                                }}
+                                                className="flex justify-between items-center p-4 bg-white border-2 border-[#ddd0b8] rounded-2xl hover:border-[#8b1a1a] transition-all group active:scale-[0.98]"
+                                            >
+                                                <div className="text-left">
+                                                    <div className="font-bold text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
+                                                    {drink.deposit_amount && drink.deposit_amount > 0 && (
+                                                        <div className="text-[10px] opacity-60 font-medium">Inkl. {drink.deposit_amount.toFixed(2)} € Pfand</div>
+                                                    )}
+                                                </div>
+                                                <div className="font-black text-[#8b1a1a]">{drink.base_price.toFixed(2)} €</div>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="pt-4 border-t border-[#ddd0b8]/50">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOrder()}
+                                            className="w-full py-4 bg-[#8b1a1a] text-white font-bold rounded-2xl shadow-lg hover:bg-[#6e1313] transition-all active:scale-[0.98]"
+                                        >
+                                            Jetzt Kostenpflichtig bestellen ({(getTotal() + tip).toFixed(2)} €)
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
             </>
             )}
         </div>

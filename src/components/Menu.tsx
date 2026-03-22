@@ -398,7 +398,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         </div>
                     </div>
                     {items.length > 0 && (
-                        isCurrentlyOpen ? <Checkout onComplete={() => setShowCheckout(false)} features={features} /> : (
+                        isCurrentlyOpen ? <Checkout onComplete={() => setShowCheckout(false)} features={features} products={products} /> : (
                             <div className="rounded-xl p-5 text-center border font-semibold"
                                 style={{ background: "#fdf0f0", borderColor: "#e8b4b4", color: "#7a1a1a" }}>
                                 🕒 Aktuell geschlossen.
