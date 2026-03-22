@@ -242,23 +242,22 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
         };
 
         return (
-            <div className="p-6 rounded-2xl shadow-sm border-2 mb-8 max-w-3xl mx-auto mt-4"
+            <div className="p-4 rounded-xl shadow-sm border-2 mb-4 max-w-xl mx-auto mt-4"
                 style={{
                     background: isCancelled ? "#fdf0f0" : "#fffdf9",
                     borderColor: isCancelled ? "#e8b4b4" : "#ddd0b8"
                 }}>
                 <div className="text-center">
-                    <div className="text-4xl mb-3">{isCancelled ? "❌" : "✅"}</div>
-                    <h2 className="text-2xl font-bold mb-2" style={{ color: isCancelled ? "#991b1b" : "#1a1008" }}>
-                        {isCancelled ? `Deine Bestellung ${order.short_id} wurde erfolgreich storniert.` : `Bestellung ${order.short_id} ist ${getStatusText(order.status)}`}
+                    <h2 className="text-lg font-bold mb-3" style={{ color: isCancelled ? "#991b1b" : "#1a1008" }}>
+                        {isCancelled ? `Bestellung ${order.short_id} wurde storniert.` : `Bestellung ${order.short_id} ist ${getStatusText(order.status)}`}
                     </h2>
 
                     {!isCancelled && order.status === "COMPLETED" && !reviewed && (
-                        <div className="my-6 p-4 rounded-xl border border-[#ddd0b8] bg-white/50">
-                            <p className="font-bold text-sm mb-3" style={{ color: "#5c4a32" }}>Wie hat es geschmeckt?</p>
-                            <div className="flex justify-center gap-2 mb-4">
+                        <div className="mb-4 p-3 rounded-xl border border-[#ddd0b8] bg-white/50">
+                            <p className="font-bold text-xs mb-2" style={{ color: "#5c4a32" }}>Wie hat es geschmeckt?</p>
+                            <div className="flex justify-center gap-2 mb-3">
                                 {[1, 2, 3, 4, 5].map(s => (
-                                    <button key={s} onClick={() => setRating(s)} className="text-3xl transition-transform active:scale-90">
+                                    <button key={s} onClick={() => setRating(s)} className="text-2xl transition-transform active:scale-90">
                                         {s <= rating ? "⭐" : "☆"}
                                     </button>
                                 ))}
@@ -269,14 +268,14 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                                         placeholder="Feedback (optional)..."
                                         value={comment}
                                         onChange={e => setComment(e.target.value)}
-                                        className="w-full p-3 text-sm border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#8b1a1a]/20"
+                                        className="w-full p-2 text-xs border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-[#8b1a1a]/20"
                                         style={{ borderColor: "#ddd0b8" }}
                                         rows={2}
                                     />
                                     <button
                                         disabled={submittingReview}
                                         onClick={submitReview}
-                                        className="w-full py-2 bg-[#8b1a1a] text-white rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50"
+                                        className="w-full py-2 bg-[#8b1a1a] text-white rounded-lg font-bold text-xs hover:opacity-90 disabled:opacity-50"
                                     >
                                         {submittingReview ? "..." : "Senden"}
                                     </button>
@@ -286,23 +285,25 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                     )}
 
                     {!isCancelled && reviewed && (
-                        <p className="text-[#1a7a3a] font-bold text-sm my-6">Danke für deine Bewertung! ❤️</p>
+                        <p className="text-[#1a7a3a] font-bold text-xs mb-4">Danke für deine Bewertung! ❤️</p>
                     )}
 
                     {!isCancelled && !reviewed && order.status !== "COMPLETED" && (
-                        <p className="text-sm mb-6" style={{ color: "#5c4a32" }}>
+                        <p className="text-xs mb-4" style={{ color: "#5c4a32" }}>
                             Vielen Dank für deinen Einkauf!
                         </p>
                     )}
                     {!isCancelled && features?.allowReviews && (
-                        <ReviewPrompt />
+                        <div className="mb-4">
+                            <ReviewPrompt />
+                        </div>
                     )}
                     <button onClick={async () => {
                         await fetch("/api/orders/track", { method: "DELETE" });
                         setOrder(null);
-                    }} className="font-bold px-6 py-3 rounded-lg transition-transform active:scale-95"
+                    }} className="font-bold px-5 py-2.5 rounded-lg text-sm transition-transform active:scale-95"
                         style={{ background: isCancelled ? "#ba2c2c" : "#8b1a1a", color: "white" }}>
-                        {isCancelled ? "Ausblenden & neue Bestellung aufgeben" : "Meldung schließen"}
+                        {isCancelled ? "Neue Bestellung aufgeben" : "Schließen"}
                     </button>
                 </div>
             </div>
