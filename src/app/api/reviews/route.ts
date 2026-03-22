@@ -25,13 +25,15 @@ export async function POST(req: Request) {
         }
 
         const cookieStore = await cookies();
-        const orderId = cookieStore.get("order_session")?.value;
+        const sessionOrderId = cookieStore.get("order_session")?.value;
+        const body = await req.json();
+        const orderId = typeof body?.orderId === "string" && body.orderId.trim() ? body.orderId.trim() : sessionOrderId;
 
         if (!orderId) {
             return NextResponse.json({ error: "Keine aktive Bestellung gefunden." }, { status: 400 });
         }
 
-        const { score, comment } = await req.json();
+        const { score, comment } = body;
 
         if (typeof score !== "number" || score < 1 || score > 5 || !Number.isInteger(score)) {
             return NextResponse.json({ error: "Ungültige Bewertung. Bitte wähle 1–5 Sterne." }, { status: 400 });
