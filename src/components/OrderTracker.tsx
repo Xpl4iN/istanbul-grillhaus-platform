@@ -137,6 +137,12 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
     const [cancelling, setCancelling] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
 
+    // States for the 'isDone' view (Review flow)
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState("");
+    const [reviewed, setReviewed] = useState(false);
+    const [submittingReview, setSubmittingReview] = useState(false);
+
 
     const cancelOrder = async () => {
         setCancelling(true);
@@ -162,6 +168,14 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
             if (res.ok) {
                 const data = await res.json();
                 setOrder(data.order);
+                // Reset review states if order changed
+                if (data.order?.id !== order?.id) {
+                    setRating(0);
+                    setComment("");
+                    setReviewed(false);
+                }
+            } else if (res.status === 404) {
+                setOrder(null);
             }
         } catch (e) {
             console.error(e);
@@ -212,10 +226,6 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
 
     if (isDone) {
         const isCancelled = order.status === "CANCELLED";
-        const [rating, setRating] = useState(0);
-        const [comment, setComment] = useState("");
-        const [reviewed, setReviewed] = useState(false);
-        const [submittingReview, setSubmittingReview] = useState(false);
 
         const submitReview = async () => {
             if (rating === 0) return;
@@ -223,6 +233,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
             try {
                 const res = await fetch("/api/reviews", {
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ rating, comment })
                 });
                 if (res.ok) setReviewed(true);
