@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const ReviewPrompt = () => {
+const ReviewPrompt = ({ orderId }: { orderId: string }) => {
     const [rating, setRating] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -16,7 +16,7 @@ const ReviewPrompt = () => {
             const res = await fetch("/api/reviews", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ score: star })
+                body: JSON.stringify({ score: star, orderId })
             });
             if (res.ok || res.status === 409) {
                 setSubmitted(true);
@@ -36,7 +36,6 @@ const ReviewPrompt = () => {
     if (submitted) {
         return (
             <div className="mt-4 mb-4 p-4 rounded-xl border text-center" style={{ background: "#f0fdf4", borderColor: "#b4e8c1" }}>
-                <span className="text-2xl">🙏</span>
                 <p className="text-sm font-semibold mt-1" style={{ color: "#166534" }}>Danke für deine Bewertung!</p>
             </div>
         );
@@ -55,7 +54,7 @@ const ReviewPrompt = () => {
                         className="text-3xl transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={`${star} Sterne`}
                     >
-                        {star <= rating ? "⭐" : "☆"}
+                        {star <= rating ? "★" : "☆"}
                     </button>
                 ))}
             </div>
@@ -153,7 +152,6 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                     borderColor: isCancelled ? "#e8b4b4" : "#ddd0b8"
                 }}>
                 <div className="text-center">
-                    <div className="text-4xl mb-3">{isCancelled ? "❌" : "✅"}</div>
                     <h2 className="text-2xl font-bold mb-2" style={{ color: isCancelled ? "#991b1b" : "#1a1008" }}>
                         {isCancelled ? `Deine Bestellung ${order.short_id} wurde erfolgreich storniert.` : `Bestellung ${order.short_id} ist ${getStatusText(order.status)}`}
                     </h2>
@@ -162,8 +160,8 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                             Vielen Dank für deinen Einkauf!
                         </p>
                     )}
-                    {!isCancelled && features.allowReviews && (
-                        <ReviewPrompt />
+                    {!isCancelled && features.allowReviews && order.status === "COMPLETED" && (
+                        <ReviewPrompt orderId={order.id} />
                     )}
                     <button onClick={async () => {
                         await fetch("/api/orders/track", { method: "DELETE" });
@@ -194,7 +192,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                                 color: order.dining_option === "dine-in" ? "#1e40af" : order.dining_option === "delivery" ? "#92400e" : "#166534"
                             }}
                         >
-                            {order.dining_option === "dine-in" ? "🍽️ Vor Ort essen" : order.dining_option === "delivery" ? "🚗 Lieferung" : "🏠 Zum Mitnehmen"}
+                            {order.dining_option === "dine-in" ? "Vor Ort essen" : order.dining_option === "delivery" ? "Lieferung" : "Zum Mitnehmen"}
                         </span>
                     )}
                 </div>
@@ -207,9 +205,6 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
             <div className={`p-4 rounded-xl border-2 ${statusStyle.animate || ""} mb-6 flex justify-between items-center`}
                 style={{ background: statusStyle.bg, border: "2px solid", borderColor: statusStyle.border, color: statusStyle.text }}>
                 <span className="font-bold text-lg">{getStatusText(order.status)}</span>
-                {order.status === "READY" && <span className="text-2xl">🏃‍♂️💨</span>}
-                {order.status === "PENDING" && <span className="text-2xl">⏳</span>}
-                {order.status === "ACCEPTED" && <span className="text-2xl">👨‍🍳</span>}
             </div>
 
             <div className="space-y-3">
@@ -256,10 +251,9 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
                     <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full" style={{ border: "4px solid #fecaca" }}>
                         <div className="text-center">
-                            <span className="text-5xl mb-4 block">🗑️</span>
                             <h3 className="text-2xl font-black mb-2" style={{ color: "#1a1008" }}>Bestellung stornieren?</h3>
                             <p className="mb-8 font-medium" style={{ color: "#5c4a32" }}>
-                                Möchtest du deine Bestellung wirklich stornieren? Dieser Vorgang kann nicht rükgängig gemacht werden.
+                                Möchtest du deine Bestellung wirklich stornieren? Dieser Vorgang kann nicht rückgängig gemacht werden.
                             </p>
                             <div className="flex gap-4">
                                 <button
