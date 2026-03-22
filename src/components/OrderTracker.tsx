@@ -283,13 +283,9 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                             Vielen Dank für deinen Einkauf!
                         </p>
                     )}
-<<<<<<< HEAD
-
-=======
-                    {!isCancelled && features.allowReviews && (
+                    {!isCancelled && features?.allowReviews && (
                         <ReviewPrompt />
                     )}
->>>>>>> 3489e6242769183348d74ca545abb1d42332057a
                     <button onClick={async () => {
                         await fetch("/api/orders/track", { method: "DELETE" });
                         setOrder(null);
