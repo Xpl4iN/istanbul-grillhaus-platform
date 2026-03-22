@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         const tag = body.tag;
 
         if (tag) {
-            revalidateTag(tag);
+            revalidateTag(tag, "default");
             return NextResponse.json({ revalidated: true, now: Date.now() });
         }
 
