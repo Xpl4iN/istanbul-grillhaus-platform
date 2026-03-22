@@ -240,18 +240,29 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 if (!openingHours) return "Öffnungszeiten nicht verfügbar";
                                 const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
                                 const now = new Date();
-                                const currentDayIdx = now.getDay();
+                                const berlinNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+                                const currentDayIdx = berlinNow.getDay();
+                                const todayKey = days[currentDayIdx];
+                                const schedToday = openingHours[todayKey] || openingHours[todayKey.charAt(0).toUpperCase() + todayKey.slice(1)];
+                                
+                                const currentTimeStr = berlinNow.getHours().toString().padStart(2, '0') + ':' + berlinNow.getMinutes().toString().padStart(2, '0');
 
                                 if (isCurrentlyOpen) {
-                                    const today = days[currentDayIdx];
-                                    const sched = openingHours[today] || openingHours[today.charAt(0).toUpperCase() + today.slice(1)];
-                                    return `Heute: ${sched?.open || '--:--'} – ${sched?.close || '--:--'}`;
+                                    return `Heute: ${schedToday?.open || '--:--'} – ${schedToday?.close || '--:--'}`;
                                 } else {
-                                    const tomorrowIdx = (currentDayIdx + 1) % 7;
-                                    const tomorrow = days[tomorrowIdx];
-                                    const sched = openingHours[tomorrow] || openingHours[tomorrow.charAt(0).toUpperCase() + tomorrow.slice(1)];
-                                    const dayName = tomorrowIdx === 1 ? 'Montag' : tomorrowIdx === 2 ? 'Dienstag' : tomorrowIdx === 3 ? 'Mittwoch' : tomorrowIdx === 4 ? 'Donnerstag' : tomorrowIdx === 5 ? 'Freitag' : tomorrowIdx === 6 ? 'Samstag' : 'Sonntag';
-                                    return `Morgen (${dayName}): ${sched?.open || '--:--'} – ${sched?.close || '--:--'}`;
+                                    // If we are after 00:00 but BEFORE today's opening time, show "Heute"
+                                    const isBeforeOpeningToday = schedToday?.open && currentTimeStr < schedToday.open;
+                                    
+                                    if (isBeforeOpeningToday) {
+                                        return `Heute: ${schedToday?.open || '--:--'} – ${schedToday?.close || '--:--'}`;
+                                    } else {
+                                        // We are after closing time of today, show tomorrow
+                                        const tomorrowIdx = (currentDayIdx + 1) % 7;
+                                        const tomorrowKey = days[tomorrowIdx];
+                                        const schedTomorrow = openingHours[tomorrowKey] || openingHours[tomorrowKey.charAt(0).toUpperCase() + tomorrowKey.slice(1)];
+                                        const dayName = tomorrowIdx === 1 ? 'Montag' : tomorrowIdx === 2 ? 'Dienstag' : tomorrowIdx === 3 ? 'Mittwoch' : tomorrowIdx === 4 ? 'Donnerstag' : tomorrowIdx === 5 ? 'Freitag' : tomorrowIdx === 6 ? 'Samstag' : 'Sonntag';
+                                        return `Morgen (${dayName}): ${schedTomorrow?.open || '--:--'} – ${schedTomorrow?.close || '--:--'}`;
+                                    }
                                 }
                             })()}
                         </div>
