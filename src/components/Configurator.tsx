@@ -45,6 +45,8 @@ export default function Configurator({ product, onClose, editCartItemId, initial
         return (allGroups as ModifierGroup[]).filter(group => {
             // Respect global/explicit filters
             if (product.is_vegetarian && group.applies_to_vegetarian === false) return false;
+            // Removed strict meat check here to allow meat options for non-vegetarian products
+            // by default if applies_to_meat is not explicitly false.
             if (!product.is_vegetarian && group.applies_to_meat === false) return false;
             if (product.is_drink && group.applies_to_drinks === false) return false;
             
@@ -59,7 +61,7 @@ export default function Configurator({ product, onClose, editCartItemId, initial
             if (product.is_vegetarian) {
                 return {
                     ...group,
-                    modifiers: group.modifiers.filter(m => !m.is_meat)
+                    modifiers: group.modifiers.filter(m => m.is_meat !== true)
                 };
             }
             return group;

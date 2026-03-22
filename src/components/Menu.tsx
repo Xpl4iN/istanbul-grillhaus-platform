@@ -57,7 +57,7 @@ function ProductSuperscript({ allergens, additives }: { allergens?: string | nul
     if (parts.length === 0) return null;
 
     return (
-        <sup className="text-[10px] ml-0.5 opacity-60 font-medium">
+        <sup className="text-[10px] ml-0.5 opacity-60 font-medium whitespace-nowrap">
             {parts.join(', ')}
         </sup>
     );
@@ -71,7 +71,10 @@ const isStoreOpen = (hours: any) => {
     const currentDay = days[now.getDay()];
     const formatter = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hour12: false });
     const currentTimeStr = formatter.format(now);
-    const todayHours = hours[currentDay];
+    
+    // Fallback support for both lowercase and capital day names
+    const todayHours = hours[currentDay] || hours[currentDay.charAt(0).toUpperCase() + currentDay.slice(1)];
+    
     if (!todayHours || !todayHours.open || !todayHours.close) return false;
     return currentTimeStr >= todayHours.open && currentTimeStr <= todayHours.close;
 };
@@ -87,7 +90,8 @@ const formatOpeningHours = (hours: any) => {
     let currentGroup: { days: string[]; hours: string } | null = null;
 
     days.forEach(day => {
-        const schedule = hours[day];
+        // Handle both lowercase and TitleCase keys for business hours
+        const schedule = hours[day] || hours[day.charAt(0).toUpperCase() + day.slice(1)];
         const hoursStr = schedule?.open && schedule?.close ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
         
         if (currentGroup && currentGroup.hours === hoursStr) {
@@ -98,12 +102,14 @@ const formatOpeningHours = (hours: any) => {
         }
     });
 
-    return groups.map(group => {
+    const output = groups.map(group => {
         const startDay = dayLabels[group.days[0]];
         const endDay = dayLabels[group.days[group.days.length - 1]];
-        const dayStr = group.days.length > 1 ? `${startDay}–${endDay}` : startDay;
-        return `${dayStr} ${group.hours}`;
+        const rangeLabel = group.days.length > 1 ? `${startDay}–${endDay}` : startDay;
+        return `${rangeLabel} ${group.hours}`;
     }).join(' · ');
+
+    return output || "Öffnungszeiten nicht verfügbar";
 };
 
 export default function Menu({ initialProducts = [], initialIsOpen = true, openingHours = null, features = {} }: { initialProducts?: Product[], initialIsOpen?: boolean, openingHours?: any, features?: any }) {
@@ -120,30 +126,24 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
         const updateOpenStatus = () => {
             setIsOpen(isStoreOpen(openingHours));
         };
-
-        // Initial check
         updateOpenStatus();
-
-        // Set up interval to check every minute
         const interval = setInterval(updateOpenStatus, 60000);
-
         return () => clearInterval(interval);
-    }, []);
+    }, [openingHours]);
 
     const isCurrentlyOpen = isOpen || isTestMode;
-
     const navRef = useRef<HTMLDivElement>(null);
-
-    // SSR enabled: API fetch removed, using initial props.
 
     const groupedProducts = useMemo(() => {
         const groups: Record<string, { categoryName: string; categoryId: string; sortOrder: number; products: Product[] }> = {};
         products.forEach(p => {
-            const catName = p.category?.name || "Sonstiges";
-            const catId = catName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-            const sortOrder = p.category?.sort_order || 999;
-            if (!groups[catName]) groups[catName] = { categoryName: catName, categoryId: catId, sortOrder, products: [] };
-            groups[catName].products.push(p);
+            const catId = p.category?.id || 'other';
+            const catName = p.category?.name || 'Sonstiges';
+            const catOrder = p.category?.sort_order || 999;
+            if (!groups[catId]) {
+                groups[catId] = { categoryName: catName, categoryId: catId, sortOrder: catOrder, products: [] };
+            }
+            groups[catId].products.push(p);
         });
         return Object.values(groups).sort((a, b) => a.sortOrder - b.sortOrder);
     }, [products]);
@@ -151,24 +151,17 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
     const scrollToCategory = (id: string) => {
         const el = document.getElementById(id);
         if (el) {
-            const offset = 80; // Adjusted for sticky header
+            const offset = 80;
             const bodyRect = document.body.getBoundingClientRect().top;
             const elementRect = el.getBoundingClientRect().top;
             const elementPosition = elementRect - bodyRect;
             const offsetPosition = elementPosition - offset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
-            });
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
         }
     };
 
     return (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20 pt-4">
-            {/* Header */}
-            {/* TODO(customBranding): when features.customBranding is true, replace hardcoded name,
-                colours, and logo below with organisation-specific brand assets from the database. */}
             <header className="mb-6 rounded-2xl overflow-hidden shadow-2xl"
                 style={{ background: "linear-gradient(160deg,#0a5c45 0%,#096a50 50%,#074f3c 100%)", border: "3px solid #0d7a5e" }}>
                 <div className="px-8 pt-8 pb-4 text-center">
@@ -189,7 +182,6 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 </div>
             </header>
 
-            {/* Status Banner */}
             <div className="mb-4">
                 {!isCurrentlyOpen ? (
                     <div className="p-4 rounded-xl text-center font-semibold text-sm border"
@@ -204,28 +196,17 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 )}
             </div>
 
-            {/* Sticky Category Nav */}
             {!showCheckout && (
                 <div className="sticky top-0 z-40 mb-6"
                     style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', width: '100vw' }}>
                     <nav className="px-4 sm:px-6 py-3 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-[#ddd0b8]/50 overflow-x-auto flex justify-start md:justify-center gap-2 no-scrollbar"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                        <style jsx>{`
-                            .no-scrollbar::-webkit-scrollbar {
-                                display: none;
-                            }
-                        `}</style>
                         {groupedProducts.map(group => (
                             <button
                                 key={group.categoryId}
                                 onClick={() => scrollToCategory(group.categoryId)}
                                 className="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 border"
-                                style={{
-                                    background: "#fffdf9",
-                                    borderColor: "#ddd0b8",
-                                    color: "#5c4a32",
-                                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-                                }}
+                                style={{ background: "#fffdf9", borderColor: "#ddd0b8", color: "#5c4a32", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
                             >
                                 {iconFor(group.categoryName)} {group.categoryName}
                             </button>
@@ -234,7 +215,6 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 </div>
             )}
 
-            {/* Main Content */}
             {showCheckout ? (
                 <div className="space-y-6">
                     <button onClick={() => setShowCheckout(false)}
@@ -248,16 +228,15 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                         {items.length === 0 ? (
                             <p className="text-sm" style={{ color: "#5c4a32" }}>Ihr Warenkorb ist leer.</p>
                         ) : (
-                            <ul>
+                            <ul className="divide-y divide-[#eddfc8]">
                                 {items.map(item => (
-                                    <li key={item.id} className="py-3 flex justify-between items-center border-b last:border-0"
-                                        style={{ borderColor: "#eddfc8" }}>
+                                    <li key={item.id} className="py-4 flex justify-between items-start gap-4">
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-sm" style={{ color: "#1a1008" }}>{item.quantity}× {item.product.name}</p>
+                                            <p className="font-bold text-sm text-[#1a1008]">{item.quantity}× {item.product.name}</p>
                                             {Object.keys(item.modifiers).length > 0 && (
-                                                <ul className="text-[11px] mt-1 space-y-0.5 font-medium" style={{ color: "#8b1a1a", opacity: 0.85 }}>
+                                                <ul className="text-[11px] mt-1 space-y-0.5 font-medium text-[#8b1a1a]/80">
                                                     {Object.entries(item.modifiers).flatMap(([groupId, modIds]) => {
-                                                        const group = item.product.modifier_groups?.find(g => g.id === groupId);
+                                                        const group = [...(item.product.modifier_groups || []), ...(item.product as any).global_modifier_groups || []].find(g => g.id === groupId);
                                                         if (!group) return [];
                                                         return modIds.map(modId => {
                                                             const mod = group.modifiers.find(m => m.id === modId);
@@ -266,37 +245,20 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                                     })}
                                                 </ul>
                                             )}
-                                            {(item.product.modifier_groups?.length ?? 0) > 0 && (
-                                                <button
-                                                    onClick={() => setEditingCartItem({ id: item.id, product: item.product, modifiers: item.modifiers })}
-                                                    className="text-[11px] mt-1 font-semibold hover:underline"
-                                                    style={{ color: "#b8860b" }}
-                                                >
-                                                    ✏️ Anpassen
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => setEditingCartItem({ id: item.id, product: item.product, modifiers: item.modifiers })}
+                                                className="mt-2 text-[11px] font-bold text-[#b8860b] hover:opacity-70 flex items-center gap-1 uppercase tracking-wider"
+                                            >
+                                                <span>✏️</span> ANPASSEN
+                                            </button>
                                         </div>
-                                        <div className="flex gap-3 items-center shrink-0">
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() => setItemQuantity(item.id, item.quantity - 1)}
-                                                    className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
-                                                    style={{ background: "#f6efe3", color: "#5c4a32" }}
-                                                >
-                                                    −
-                                                </button>
-                                                <button
-                                                    onClick={() => setItemQuantity(item.id, item.quantity + 1)}
-                                                    className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
-                                                    style={{ background: "#f6efe3", color: "#5c4a32" }}
-                                                >
-                                                    +
-                                                </button>
-                                            </div>
+                                        <div className="flex flex-col items-end gap-2">
                                             <span className="font-bold text-sm">{(item.price * item.quantity).toFixed(2)} €</span>
-                                            <button onClick={() => removeItem(item.id)}
-                                                className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
-                                                style={{ background: "#fde8e8", color: "#8b1a1a" }}>✕</button>
+                                            <div className="flex items-center gap-1 bg-[#f5f0e8] p-1 rounded-lg">
+                                                <button onClick={() => setItemQuantity(item.id, Math.max(0, item.quantity - 1))} className="w-6 h-6 flex items-center justify-center font-bold text-[#5c4a32]">−</button>
+                                                <span className="text-xs font-bold w-4 text-center text-[#5c4a32]">{item.quantity}</span>
+                                                <button onClick={() => setItemQuantity(item.id, item.quantity + 1)} className="w-6 h-6 flex items-center justify-center font-bold text-[#5c4a32]">+</button>
+                                            </div>
                                         </div>
                                     </li>
                                 ))}
@@ -338,9 +300,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                                 </h3>
                                                 {p.description && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: "#7a6248" }}>{p.description}</p>}
                                                 {p.deposit_amount && p.deposit_amount > 0 && (
-                                                    <p className="text-[10px] mt-1 font-medium opacity-70" style={{ color: "#5c4a32" }}>
-                                                        Inkl. {p.deposit_amount.toFixed(2)} € Pfand
-                                                    </p>
+                                                    <p className="text-[10px] mt-1 font-medium opacity-70" style={{ color: "#5c4a32" }}>Inkl. {p.deposit_amount.toFixed(2)} € Pfand</p>
                                                 )}
                                             </div>
                                             <span className="shrink-0 font-bold text-sm px-2 py-0.5 rounded-md transition-colors group-hover:bg-[#a12323]"
@@ -348,7 +308,6 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                                 {p.base_price.toFixed(2)} €
                                             </span>
                                         </div>
-                                        {(p.modifier_groups?.length ?? 0) > 0 && <p className="text-xs mt-3 font-medium flex items-center gap-1" style={{ color: "#b8860b" }}>Anpassbar <span className="text-[10px]">›</span></p>}
                                     </button>
                                 ))}
                             </div>
@@ -359,15 +318,8 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
 
             <OrderHistory />
 
-            {/* Legal Footer */}
             <footer className="mt-16 pt-8 border-t border-[#ddd0b8] text-center space-y-4">
-                <button
-                    onClick={() => setShowLMIVModal(true)}
-                    className="text-xs font-semibold hover:underline"
-                    style={{ color: "#8b1a1a" }}
-                >
-                    Allergene & Zusatzstoffe einsehen
-                </button>
+                <button onClick={() => setShowLMIVModal(true)} className="text-xs font-semibold hover:underline" style={{ color: "#8b1a1a" }}>Allergene & Zusatzstoffe einsehen</button>
                 <div className="flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest" style={{ color: "#5c4a32" }}>
                     <Link href="/impressum" className="hover:text-[#8b1a1a] transition-colors">Impressum</Link>
                     <Link href="/datenschutz" className="hover:text-[#8b1a1a] transition-colors">Datenschutz</Link>
@@ -375,7 +327,6 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 <p className="text-[10px] opacity-40">© {new Date().getFullYear()} Istanbul Grillhaus Weilheim. Alle Preise in Euro inkl. MwSt.</p>
             </footer>
 
-            {/* LMIV Modal */}
             {showLMIVModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowLMIVModal(false)}>
                     <div className="bg-[#fffdf9] w-full max-w-md max-h-[80vh] overflow-y-auto rounded-2xl p-6 shadow-2xl border-2 border-[#8b1a1a]" onClick={e => e.stopPropagation()}>
@@ -388,10 +339,7 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 <h3 className="font-bold mb-2 border-b pb-1" style={{ color: "#5c4a32" }}>Zusatzstoffe (Zahlen)</h3>
                                 <div className="grid grid-cols-1 gap-x-4 gap-y-1">
                                     {Object.entries(LMIV_LEGEND).filter(([k]) => !isNaN(Number(k))).map(([k, v]) => (
-                                        <div key={k} className="flex gap-2">
-                                            <span className="font-bold min-w-[20px]">{k}</span>
-                                            <span className="opacity-80">{v}</span>
-                                        </div>
+                                        <div key={k} className="flex gap-2"><span className="font-bold min-w-[20px]">{k}</span><span className="opacity-80">{v}</span></div>
                                     ))}
                                 </div>
                             </section>
@@ -399,26 +347,17 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                 <h3 className="font-bold mb-2 border-b pb-1" style={{ color: "#5c4a32" }}>Allergene (Buchstaben)</h3>
                                 <div className="grid grid-cols-1 gap-x-4 gap-y-1">
                                     {Object.entries(LMIV_LEGEND).filter(([k]) => isNaN(Number(k))).map(([k, v]) => (
-                                        <div key={k} className="flex gap-2">
-                                            <span className="font-bold min-w-[20px] uppercase">{k}</span>
-                                            <span className="opacity-80">{v}</span>
-                                        </div>
+                                        <div key={k} className="flex gap-2"><span className="font-bold min-w-[20px] uppercase">{k}</span><span className="opacity-80">{v}</span></div>
                                     ))}
                                 </div>
                             </section>
                         </div>
-                        <button
-                            onClick={() => setShowLMIVModal(false)}
-                            className="w-full mt-8 py-3 bg-[#8b1a1a] text-white font-bold rounded-xl"
-                        >
-                            Verstanden
-                        </button>
+                        <button onClick={() => setShowLMIVModal(false)} className="w-full mt-8 py-3 bg-[#8b1a1a] text-white font-bold rounded-xl">Verstanden</button>
                     </div>
                 </div>
             )}
 
             {selectedProduct && <Configurator product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
-
             {editingCartItem && (
                 <Configurator
                     product={editingCartItem.product}
@@ -429,7 +368,6 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                 />
             )}
 
-            {/* Sticky cart button */}
             {!showCheckout && items.length > 0 && (
                 <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 pointer-events-none flex justify-center z-40"
                     style={{ background: "linear-gradient(to top,#f5f0e8 60%,transparent)" }}>
@@ -444,7 +382,6 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                     </button>
                 </div>
             )}
-
         </div>
     );
 }
