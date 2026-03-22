@@ -46,7 +46,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Bestellung nicht gefunden." }, { status: 404 });
         }
 
-        if (!["COMPLETED", "READY"].includes(order.status)) {
+        if (!["COMPLETED", "READY", "NO_SHOW"].includes(order.status)) {
             return NextResponse.json({ error: "Bewertungen können nur für abgeschlossene Bestellungen abgegeben werden." }, { status: 400 });
         }
 

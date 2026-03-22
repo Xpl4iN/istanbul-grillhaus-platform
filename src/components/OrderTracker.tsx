@@ -1,33 +1,47 @@
 "use client";
 import { useState, useEffect } from "react";
 
+const StarIcon = ({ filled, hovered }: { filled: boolean; hovered: boolean }) => (
+    <svg
+        viewBox="0 0 24 24"
+        fill={filled || hovered ? "#c4860a" : "none"}
+        stroke={filled || hovered ? "#c4860a" : "#b8a080"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-8 h-8"
+        aria-hidden="true"
+    >
+        <path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5z" />
+    </svg>
+);
+
 const ReviewPrompt = () => {
     const [rating, setRating] = useState(0);
+    const [hovered, setHovered] = useState(0);
+    const [comment, setComment] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleRating = async (star: number) => {
-        if (submitting || submitted) return;
-        setRating(star);
+    const handleSubmit = async () => {
+        if (!rating || submitting || submitted) return;
         setSubmitting(true);
         setError(null);
         try {
             const res = await fetch("/api/reviews", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ score: star })
+                body: JSON.stringify({ score: rating, ...(comment.trim() ? { comment: comment.trim() } : {}) })
             });
             if (res.ok || res.status === 409) {
                 setSubmitted(true);
             } else {
                 const data = await res.json().catch(() => ({}));
                 setError(data.error || "Bewertung konnte nicht gespeichert werden.");
-                setRating(0);
             }
         } catch {
             setError("Netzwerkfehler. Bitte versuche es erneut.");
-            setRating(0);
         } finally {
             setSubmitting(false);
         }
@@ -36,8 +50,7 @@ const ReviewPrompt = () => {
     if (submitted) {
         return (
             <div className="mt-4 mb-4 p-4 rounded-xl border text-center" style={{ background: "#f0fdf4", borderColor: "#b4e8c1" }}>
-                <span className="text-2xl">🙏</span>
-                <p className="text-sm font-semibold mt-1" style={{ color: "#166534" }}>Danke für deine Bewertung!</p>
+                <p className="text-sm font-semibold" style={{ color: "#166534" }}>Danke für deine Bewertung!</p>
             </div>
         );
     }
@@ -45,21 +58,49 @@ const ReviewPrompt = () => {
     return (
         <div className="mt-2 mb-6 p-4 rounded-xl border" style={{ background: "#fffdf9", borderColor: "#ddd0b8" }}>
             <p className="text-sm font-semibold mb-3 text-center" style={{ color: "#1a1008" }}>Wie war dein Erlebnis?</p>
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-1" role="group" aria-label="Sternebewertung">
                 {[1, 2, 3, 4, 5].map((star) => (
                     <button
                         key={star}
                         type="button"
-                        onClick={() => handleRating(star)}
+                        onClick={() => !submitting && setRating(star)}
+                        onMouseEnter={() => !submitting && setHovered(star)}
+                        onMouseLeave={() => setHovered(0)}
+                        onFocus={() => !submitting && setHovered(star)}
+                        onBlur={() => setHovered(0)}
                         disabled={submitting}
-                        className="text-3xl transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label={`${star} Sterne`}
+                        className="transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 rounded"
+                        aria-label={`${star} ${star === 1 ? "Stern" : "Sterne"}`}
+                        aria-pressed={rating === star}
                     >
-                        {star <= rating ? "⭐" : "☆"}
+                        <StarIcon filled={star <= rating} hovered={star <= hovered && hovered > 0} />
                     </button>
                 ))}
             </div>
-            {submitting && <p className="text-xs text-center mt-2" style={{ color: "#5c4a32" }}>Wird gespeichert…</p>}
+            {rating > 0 && (
+                <>
+                    <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        maxLength={500}
+                        rows={3}
+                        placeholder="Optionaler Kommentar (max. 500 Zeichen)"
+                        className="mt-3 w-full text-sm rounded-lg border px-3 py-2 resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+                        style={{ borderColor: "#ddd0b8", background: "#fffdf9", color: "#1a1008" }}
+                        disabled={submitting}
+                        aria-label="Kommentar zur Bewertung"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="mt-2 w-full py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ background: "#8b1a1a", color: "white" }}
+                    >
+                        {submitting ? "Wird gespeichert…" : "Bewertung absenden"}
+                    </button>
+                </>
+            )}
             {error && <p className="text-xs text-center mt-2" style={{ color: "#991b1b" }}>{error}</p>}
         </div>
     );
