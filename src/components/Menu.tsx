@@ -421,18 +421,18 @@ export default function Menu({ initialProducts = [], initialIsOpen = true, openi
                                         className="text-left w-full rounded-xl p-4 transition-all duration-200 group"
                                         style={{ background: "#fffdf9", border: "1px solid #ddd0b8", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                                         <div className="flex justify-between items-start gap-2">
-                                            <div>
-                                                <h3 className="font-semibold text-base" style={{ color: "#1a1008" }}>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-lg" style={{ color: "#1a1008" }}>
                                                     {p.name}
                                                     <ProductSuperscript allergens={p.allergens} additives={p.additives} />
                                                 </h3>
-                                                {p.description && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: "#7a6248" }}>{p.description}</p>}
+                                                {p.description && <p className="text-[15px] mt-0.5 leading-snug line-clamp-2" style={{ color: "#7a6248" }}>{p.description}</p>}
                                                 {p.deposit_amount && p.deposit_amount > 0 && (
                                                     <p className="text-[10px] mt-1 font-medium opacity-70" style={{ color: "#5c4a32" }}>Inkl. {p.deposit_amount.toFixed(2)} € Pfand</p>
                                                 )}
                                             </div>
-                                            <span className="shrink-0 font-bold text-sm px-2 py-0.5 rounded-md transition-colors group-hover:bg-[#a12323]"
-                                                style={{ background: "#8b1a1a", color: "#fff", minWidth: "54px", textAlign: "center" }}>
+                                            <span className="shrink-0 font-black text-lg py-0.5 transition-colors"
+                                                style={{ color: "#8b1a1a", minWidth: "65px", textAlign: "right" }}>
                                                 {p.base_price.toFixed(2)} €
                                             </span>
                                         </div>

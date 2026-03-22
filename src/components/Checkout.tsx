@@ -455,13 +455,13 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
                                                 }}
                                                 className="flex justify-between items-center p-4 bg-white border-2 border-[#ddd0b8] rounded-2xl hover:border-[#8b1a1a] transition-all group active:scale-[0.98]"
                                             >
-                                                <div className="text-left">
-                                                    <div className="font-bold text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
+                                                <div className="text-left flex-1">
+                                                    <div className="font-bold text-lg text-[#1a1008] group-hover:text-[#8b1a1a]">{drink.name}</div>
                                                     {drink.deposit_amount && drink.deposit_amount > 0 && (
                                                         <div className="text-[10px] opacity-60 font-medium">Inkl. {drink.deposit_amount.toFixed(2)} € Pfand</div>
                                                     )}
                                                 </div>
-                                                <div className="font-black text-[#8b1a1a]">{drink.base_price.toFixed(2)} €</div>
+                                                <div className="font-black text-lg text-[#8b1a1a] shrink-0">{drink.base_price.toFixed(2)} €</div>
                                             </button>
                                         ))}
                                     </div>
