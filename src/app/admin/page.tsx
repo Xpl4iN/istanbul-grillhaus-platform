@@ -206,7 +206,22 @@ export default function AdminDashboard() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                         {orders.filter(o => !['COMPLETED', 'NO_SHOW', 'DELETED'].includes(o.status)).map(order => (
-                            <div key={order.id} className={`rounded-xl shadow-lg border-l-8 p-4 flex flex-col gap-2 relative ${order.status === "CANCELLED" ? "bg-red-50 border-red-600 opacity-90" : "bg-white border-yellow-400"}`}>
+                            <div key={order.id} className={`rounded-xl shadow-lg border-l-8 p-4 flex flex-col gap-2 relative ${order.status === "CANCELLED" ? "bg-red-50 border-red-600" : "bg-white border-yellow-400"}`}>
+                                
+                                {order.status === 'CANCELLED' && (
+                                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden rounded-xl">
+                                        {/* Big Red X Cross through the whole card */}
+                                        <svg className="absolute inset-0 w-full h-full text-red-600/10" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                            <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="4" />
+                                            <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="4" />
+                                        </svg>
+                                        
+                                        {/* Storniert Stamp */}
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 border-4 border-red-600/40 px-6 py-2 rounded-xl">
+                                            <span className="text-4xl font-black text-red-600/30 uppercase tracking-[0.2em]">Storniert</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {order.status === 'READY' && <div className="absolute top-0 right-0 bg-green-500 text-white font-bold px-3 py-1 rounded-bl-xl text-xs shadow-sm z-10">ABHOLBEREIT</div>}
                                 {order.status === 'ACCEPTED' && <div className="absolute top-0 right-0 bg-blue-500 text-white font-bold px-3 py-1 rounded-bl-xl text-xs shadow-sm z-10">IN ZUBEREITUNG</div>}
