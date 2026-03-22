@@ -8,11 +8,11 @@ datasource db {
 }
 
 model Organization {
-  id           String        @id @default(cuid())
-  name         String
-  slug         String        @unique
-  features     Json          @default("{}") // e.g. { "online_payments": true, "table_management": true }
-  
+  id       String @id @default(cuid())
+  name     String
+  slug     String @unique
+  features Json   @default("{}") // e.g. { "online_payments": true, "table_management": true }
+
   users        User[]
   categories   Category[]
   products     Product[]
@@ -39,33 +39,33 @@ enum Role {
 }
 
 model Category {
-  id             String       @id @default(cuid())
+  id             String  @id @default(cuid())
   organizationId String
   name           String
-  sort_order     Int          @default(0)
-  is_active      Boolean      @default(true)
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  products       Product[]
+  sort_order     Int     @default(0)
+  is_active      Boolean @default(true)
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  products     Product[]
 
   @@index([organizationId])
 }
 
 model Product {
-  id              String          @id @default(uuid())
-  organizationId  String
-  category_id     String?
-  name            String
-  description     String?
-  base_price      Float
-  is_available    Boolean         @default(true)
-  is_vegetarian   Boolean         @default(false)
-  is_vegan        Boolean         @default(false)
-  is_spicy        Boolean         @default(false)
-  allergens       String?
-  additives       String?
-  deposit_amount  Float?
-  
+  id             String  @id @default(uuid())
+  organizationId String
+  category_id    String?
+  name           String
+  description    String?
+  base_price     Float
+  is_available   Boolean @default(true)
+  is_vegetarian  Boolean @default(false)
+  is_vegan       Boolean @default(false)
+  is_spicy       Boolean @default(false)
+  allergens      String?
+  additives      String?
+  deposit_amount Float?
+
   organization    Organization    @relation(fields: [organizationId], references: [id])
   category        Category?       @relation(fields: [category_id], references: [id], onDelete: Restrict)
   modifier_groups ModifierGroup[]
@@ -75,99 +75,101 @@ model Product {
 }
 
 model ModifierGroup {
-  id             String     @id @default(uuid())
+  id             String  @id @default(uuid())
   product_id     String
   name           String
-  is_required    Boolean    @default(false)
-  max_selections Int        @default(1)
-  
-  product        Product    @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  modifiers      Modifier[]
+  is_required    Boolean @default(false)
+  max_selections Int     @default(1)
+
+  product   Product    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  modifiers Modifier[]
 }
 
 model Modifier {
-  id                 String              @id @default(uuid())
-  group_id           String
-  name               String
-  price_delta        Float               @default(0.0)
-  is_available       Boolean             @default(true)
-  
+  id           String  @id @default(uuid())
+  group_id     String
+  name         String
+  price_delta  Float   @default(0.0)
+  is_available Boolean @default(true)
+
   group              ModifierGroup       @relation(fields: [group_id], references: [id], onDelete: Cascade)
   orderItemModifiers OrderItemModifier[]
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  organizationId  String
-  short_id        String      @unique
-  customer_id     String
-  status          String      @default("PENDING")
-  total_price     Float
-  pickup_time     DateTime
-  ip_address      String?
-  tip_amount      Float?      @default(0)
-  created_at      DateTime    @default(now())
-  updated_at      DateTime    @default(now())
-  dining_option   String?
-  payment_method  String?
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  customer       Customer    @relation(fields: [customer_id], references: [id], onDelete: Restrict)
-  items          OrderItem[]
-  review         Review?
+  id                    String   @id @default(uuid())
+  organizationId        String
+  short_id              String   @unique
+  customer_id           String
+  status                String   @default("PENDING")
+  total_price           Float
+  pickup_time           DateTime
+  ip_address            String?
+  tip_amount            Float?   @default(0)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @default(now())
+  dining_option         String?
+  payment_method        String?
+  payment_status        String?  @default("unpaid")
+  stripe_session_id     String?
+  stripe_payment_intent String?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  customer     Customer     @relation(fields: [customer_id], references: [id], onDelete: Restrict)
+  items        OrderItem[]
+  review       Review?
 
   @@index([organizationId])
 }
 
 model OrderItem {
-  id         String              @id @default(uuid())
+  id         String @id @default(uuid())
   order_id   String
   product_id String
-  quantity   Int                 @default(1)
+  quantity   Int    @default(1)
   unit_price Float
-  
-  order      Order               @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  product    Product             @relation(fields: [product_id], references: [id], onDelete: Restrict)
-  modifiers  OrderItemModifier[]
+
+  order     Order               @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product   Product             @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  modifiers OrderItemModifier[]
 }
 
 model OrderItemModifier {
-  id             String    @id @default(uuid())
+  id             String @id @default(uuid())
   order_item_id  String
   modifier_id    String
   modifier_price Float
-  
-  order_item     OrderItem @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
-  modifier       Modifier  @relation(fields: [modifier_id], references: [id], onDelete: Restrict)
+
+  order_item OrderItem @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+  modifier   Modifier  @relation(fields: [modifier_id], references: [id], onDelete: Restrict)
 }
 
 model Customer {
-  id               String       @id @default(uuid())
+  id               String   @id @default(uuid())
   organizationId   String
   name             String
-  phone_normalized String       
-  created_at       DateTime     @default(now())
-  
-  organization     Organization @relation(fields: [organizationId], references: [id])
-  orders           Order[]
-  reviews          Review[]
+  phone_normalized String
+  created_at       DateTime @default(now())
 
-  
-  @@index([organizationId])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  orders       Order[]
+  reviews      Review[]
+
   @@unique([organizationId, phone_normalized])
+  @@index([organizationId])
 }
 
 model Reservation {
-  id             String       @id @default(cuid())
+  id             String   @id @default(cuid())
   organizationId String
   date           DateTime
   partySize      Int
-  status         String       @default("PENDING")
+  status         String   @default("PENDING")
   customerName   String
   customerEmail  String?
   customerPhone  String?
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  organization Organization @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
 }
@@ -181,28 +183,44 @@ model Blacklist {
 }
 
 model ShopSettings {
-  id                 String       @id @default(cuid())
-  organizationId     String       @unique
-  is_open_right_now  Boolean      @default(true)
+  id                 String  @id @default(cuid())
+  organizationId     String  @unique
+  is_open_right_now  Boolean @default(true)
   opening_hours_json String
-  
-  organization       Organization @relation(fields: [organizationId], references: [id])
+
+  organization Organization @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
 }
 
 model Review {
-  id             String       @id @default(cuid())
+  id             String   @id @default(cuid())
   organizationId String
-  order_id       String       @unique
+  order_id       String   @unique
   customer_id    String?
   score          Int
   comment        String?
-  created_at     DateTime     @default(now())
+  created_at     DateTime @default(now())
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  order          Order        @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  customer       Customer?    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order        Order        @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  customer     Customer?    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
 
   @@index([organizationId])
+}
+
+model SystemLog {
+  id             String   @id @default(uuid())
+  organizationId String?
+  level          String   @default("ERROR")
+  source         String   @default("UNKNOWN")
+  app            String   @default("UNKNOWN")
+  message        String
+  stack_trace    String?
+  metadata       Json?
+  status         String   @default("UNRESOLVED")
+  created_at     DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([status])
 }
