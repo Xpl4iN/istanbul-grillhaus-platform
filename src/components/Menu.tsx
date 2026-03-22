@@ -80,19 +80,21 @@ const isStoreOpen = (hours: any) => {
 };
 
 const formatOpeningHours = (hours: any) => {
-    if (!hours) return "";
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    if (!hours) return "Öffnungszeiten nicht hinterlegt";
+    
+    // Normalize keys to title case for the days array
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const dayLabels: Record<string, string> = {
-        Monday: 'Mo', Tuesday: 'Di', Wednesday: 'Mi', Thursday: 'Do', Friday: 'Fr', Saturday: 'Sa', Sunday: 'So'
+        'Monday': 'Mo', 'Tuesday': 'Di', 'Wednesday': 'Mi', 'Thursday': 'Do', 'Friday': 'Fr', 'Saturday': 'Sa', 'Sunday': 'So'
     };
 
     const groups: { days: string[]; hours: string }[] = [];
     let currentGroup: { days: string[]; hours: string } | null = null;
 
-    days.forEach(day => {
-        // Handle both lowercase and TitleCase keys for business hours
+    dayNames.forEach(day => {
+        // Try both "Monday" and "monday"
         const schedule = hours[day] || hours[day.toLowerCase()];
-        const hoursStr = schedule?.open && schedule?.close ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
+        const hoursStr = (schedule?.open && schedule?.close) ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
         
         if (currentGroup && currentGroup.hours === hoursStr) {
             currentGroup.days.push(day);
