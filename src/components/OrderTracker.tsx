@@ -241,7 +241,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                     <h2 className="text-2xl font-bold mb-2" style={{ color: isCancelled ? "#991b1b" : "#1a1008" }}>
                         {isCancelled ? `Deine Bestellung ${order.short_id} wurde erfolgreich storniert.` : `Bestellung ${order.short_id} ist ${getStatusText(order.status)}`}
                     </h2>
-                    
+
                     {!isCancelled && order.status === "COMPLETED" && !reviewed && (
                         <div className="my-6 p-4 rounded-xl border border-[#ddd0b8] bg-white/50">
                             <p className="font-bold text-sm mb-3" style={{ color: "#5c4a32" }}>Wie hat es geschmeckt?</p>
@@ -254,7 +254,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                             </div>
                             {rating > 0 && (
                                 <>
-                                    <textarea 
+                                    <textarea
                                         placeholder="Feedback (optional)..."
                                         value={comment}
                                         onChange={e => setComment(e.target.value)}
@@ -262,7 +262,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                                         style={{ borderColor: "#ddd0b8" }}
                                         rows={2}
                                     />
-                                    <button 
+                                    <button
                                         disabled={submittingReview}
                                         onClick={submitReview}
                                         className="w-full py-2 bg-[#8b1a1a] text-white rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50"
@@ -380,7 +380,7 @@ export default function OrderTracker({ features = {} }: { features?: any }) {
                             <span className="text-5xl mb-4 block">🗑️</span>
                             <h3 className="text-2xl font-black mb-2" style={{ color: "#1a1008" }}>Bestellung stornieren?</h3>
                             <p className="mb-8 font-medium" style={{ color: "#5c4a32" }}>
-                                Möchtest du deine Bestellung wirklich stornieren? Dieser Vorgang kann nicht rükgängig gemacht werden.
+                                Möchtest du deine Bestellung wirklich stornieren? Dieser Vorgang kann nicht rückgängig gemacht werden.
                             </p>
                             <div className="flex gap-4">
                                 <button
