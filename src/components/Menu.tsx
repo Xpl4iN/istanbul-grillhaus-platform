@@ -81,9 +81,9 @@ const isStoreOpen = (hours: any) => {
 
 const formatOpeningHours = (hours: any) => {
     if (!hours) return "";
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const dayLabels: Record<string, string> = {
-        monday: 'Mo', tuesday: 'Di', wednesday: 'Mi', thursday: 'Do', friday: 'Fr', saturday: 'Sa', sunday: 'So'
+        Monday: 'Mo', Tuesday: 'Di', Wednesday: 'Mi', Thursday: 'Do', Friday: 'Fr', Saturday: 'Sa', Sunday: 'So'
     };
 
     const groups: { days: string[]; hours: string }[] = [];
@@ -91,7 +91,7 @@ const formatOpeningHours = (hours: any) => {
 
     days.forEach(day => {
         // Handle both lowercase and TitleCase keys for business hours
-        const schedule = hours[day] || hours[day.charAt(0).toUpperCase() + day.slice(1)];
+        const schedule = hours[day] || hours[day.toLowerCase()];
         const hoursStr = schedule?.open && schedule?.close ? `${schedule.open}–${schedule.close}` : 'Geschlossen';
         
         if (currentGroup && currentGroup.hours === hoursStr) {

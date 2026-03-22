@@ -45,8 +45,7 @@ export default function Configurator({ product, onClose, editCartItemId, initial
         return (allGroups as ModifierGroup[]).filter(group => {
             // Respect global/explicit filters
             if (product.is_vegetarian && group.applies_to_vegetarian === false) return false;
-            // Removed strict meat check here to allow meat options for non-vegetarian products
-            // by default if applies_to_meat is not explicitly false.
+            // Respect custom rules for meat products
             if (!product.is_vegetarian && group.applies_to_meat === false) return false;
             if (product.is_drink && group.applies_to_drinks === false) return false;
             
@@ -57,15 +56,15 @@ export default function Configurator({ product, onClose, editCartItemId, initial
             
             return true;
         }).map(group => {
-            // Filter modifiers within the group (e.g. hide "Extra Fleisch" for vegetarian)
+            // Filter modifiers within the group (e.g. hide meat-specific mods for vegetarian)
             if (product.is_vegetarian) {
                 return {
                     ...group,
-                    modifiers: group.modifiers.filter(m => m.is_meat !== true)
+                    modifiers: group.modifiers.filter(m => (m as any).is_meat !== true)
                 };
             }
             return group;
-        }).filter(group => group.modifiers.length > 0); // Hide empty groups after filtering
+        }).filter(group => group.modifiers.length > 0); 
     }, [product, items, hideDrinkUpsell]);
 
     const modifierGroups = filteredModifierGroups;

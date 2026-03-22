@@ -33,7 +33,7 @@ const getMenuData = unstable_cache(
         });
 
         const globalGroups = await prisma.modifierGroup.findMany({
-            where: { is_global: true, organizationId: ISTANBUL_ORG_ID },
+            where: { is_global: true, organizationId: ISTANBUL_ORG_ID } as any,
             include: { modifiers: true }
         });
 
@@ -61,15 +61,18 @@ const getMenuData = unstable_cache(
         if (settings?.opening_hours_json) {
             openingHours = JSON.parse(settings.opening_hours_json);
             const now = new Date();
-            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            const dayName = days[now.getDay()];
-
-            const formatterTime = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });
+            
+            // Get current time in Berlin
+            const formatterTime = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hour12: false });
             const currentTimeStr = formatterTime.format(now);
+            
+            // Get day name in English (to match common DB formats)
+            const formatterDay = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Berlin', weekday: 'long' });
+            const dayName = formatterDay.format(now).toLowerCase();
 
-            const todaySchedule = openingHours[dayName];
+            const todaySchedule = openingHours[dayName] || openingHours[dayName.charAt(0).toUpperCase() + dayName.slice(1)];
 
-            if (settings.is_open_right_now && todaySchedule && todaySchedule.open && todaySchedule.close) {
+            if (settings.is_open_right_now && todaySchedule?.open && todaySchedule?.close) {
                 if (currentTimeStr >= todaySchedule.open && currentTimeStr <= todaySchedule.close) {
                     isOpen = true;
                 }
