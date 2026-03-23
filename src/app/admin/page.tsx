@@ -326,9 +326,10 @@ export default function AdminDashboard() {
 
                         {/* Digital Clock centered */}
                         <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className="text-2xl font-black text-gray-900 tabular-nums tracking-tighter leading-none">
-                                {currentTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                            </span>
+                            <div className="text-2xl font-black text-gray-900 tabular-nums tracking-tighter leading-none">
+                                <span>{currentTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span className="text-gray-400 text-lg ml-0.5">:{currentTime.toLocaleTimeString('de-DE', { second: '2-digit' })}</span>
+                            </div>
                             <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
                                 {currentTime.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' })}
                             </span>
@@ -362,7 +363,7 @@ export default function AdminDashboard() {
                                 {/* Column 1: NEU */}
                                 <div className="flex-1 flex flex-col min-w-[280px] bg-gray-200/50 rounded-xl overflow-hidden border border-gray-200">
                                     <div className="bg-yellow-400 px-3 py-2 flex justify-between items-center shadow-sm">
-                                        <h3 className="font-black text-black text-xs uppercase tracking-widest">Neu / Storniert</h3>
+                                        <h3 className="font-black text-black text-xs uppercase tracking-widest">Neu</h3>
                                         <span className="bg-black text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                                             {sortedVisibleOrders.filter(o => o.status === 'PENDING' || o.status === 'CANCELLED').length}
                                         </span>
