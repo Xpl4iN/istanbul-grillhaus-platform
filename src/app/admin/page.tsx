@@ -12,7 +12,7 @@ const OrderCard = ({
     deleteOrder: (id: string) => void,
     setBlacklistModalOrder: (o: any) => void
 }) => (
-    <div key={order.id} className={`rounded-xl shadow-lg border-l-8 p-4 flex flex-col gap-2 relative ${order.status === "CANCELLED" ? "bg-red-50 border-red-600" : "bg-white border-yellow-400"}`}>
+    <div key={order.id} className={`rounded-xl shadow-lg border-l-8 p-3 flex flex-col gap-1 relative ${order.status === "CANCELLED" ? "bg-red-50 border-red-600" : "bg-white border-yellow-400"}`}>
         {order.status === 'CANCELLED' && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden rounded-xl">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 border-4 border-red-600/40 px-6 py-2 rounded-xl">
@@ -21,7 +21,7 @@ const OrderCard = ({
             </div>
         )}
 
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-2 mb-2">
             {order.status === 'PENDING' && (
                 <button onClick={() => updateStatus(order.id, 'ACCEPTED')} className="flex-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:scale-95 text-white text-lg font-bold py-3 rounded-lg transition-all shadow-sm">
                     Zubereiten
@@ -51,39 +51,39 @@ const OrderCard = ({
             </button>
         </div>
 
-        <div className="flex justify-between items-start pt-3 gap-2 border-t border-gray-100">
+        <div className="flex justify-between items-start pt-2 gap-2 border-t border-gray-100">
             <div className="min-w-0 flex-1">
-                <h2 className="text-3xl font-black text-gray-900 leading-none">#{order.short_id}</h2>
-                <p className="text-xs text-gray-600 font-medium mt-1 leading-tight truncate">
+                <h2 className="text-2xl font-black text-gray-900 leading-none">#{order.short_id}</h2>
+                <p className="text-[10px] text-gray-600 font-medium mt-0.5 leading-tight truncate">
                     {order.customerName} • {order.phone}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-1">
-                    <span className="text-red-700 font-bold text-[10px] bg-red-50/80 px-1 py-0.5 rounded border border-red-100 whitespace-nowrap">
+                    <span className="text-red-700 font-bold text-[9px] bg-red-50/80 px-1 py-0.5 rounded border border-red-100 whitespace-nowrap">
                         {order.payment_method === 'online' ? 'PAID' : 'CASH'}
                     </span>
                     {order.dining_option && (
-                        <span className={`inline-flex items-center gap-1 px-1 py-0.5 rounded-full text-[10px] font-black border ${order.dining_option === 'dine-in' ? 'bg-blue-50 border-blue-200 text-blue-800' : 'bg-green-50 border-green-200 text-green-800'}`}>
-                            {order.dining_option === 'dine-in' ? '🍽️ Vor Ort' : '🏠 Mitnehmen'}
+                        <span className={`inline-flex items-center gap-1 px-1 py-0.5 rounded-full text-[9px] font-black border ${order.dining_option === 'dine-in' ? 'bg-blue-50 border-blue-200 text-blue-800' : 'bg-green-50 border-green-200 text-green-800'}`}>
+                            {order.dining_option === 'dine-in' ? '🍽️' : '🏠'}
                         </span>
                     )}
                 </div>
             </div>
             <div className="text-right shrink-0">
-                <span className="text-[10px] text-gray-500 uppercase tracking-wide font-bold">Zieltzeit</span>
-                <p className="text-2xl font-black text-red-600 tracking-tighter leading-none">{order.pickup_time}</p>
+                <span className="text-[9px] text-gray-400 uppercase tracking-wide font-bold">Ziel</span>
+                <p className="text-xl font-black text-red-600 tracking-tighter leading-none">{order.pickup_time}</p>
             </div>
         </div>
 
-        <hr className="my-2 border-gray-100" />
+        <hr className="my-1 border-gray-100" />
 
-        <div className="text-lg font-medium leading-snug flex-1 py-1">
-            <ul className="list-disc pl-5 marker:text-gray-300">
+        <div className="text-base font-medium leading-tight flex-1 py-0.5 overflow-hidden">
+            <ul className="list-disc pl-4 marker:text-gray-300">
                 {order.items.map((item: any, idx: number) => (
-                    <li key={idx} className="mb-1">
-                        <span className="font-extrabold text-gray-900">{item.quantity}x {item.productName}</span>
+                    <li key={idx} className="mb-0.5">
+                        <span className="font-bold text-gray-900 text-sm">{item.quantity}x {item.productName}</span>
                         {item.modifiers?.length > 0 && (
-                            <span className="block text-sm text-red-600 ml-2 font-bold bg-red-50 px-2 py-0.5 rounded-md mt-0.5 border border-red-100 leading-tight inline-block">
-                                ➢ {item.modifiers.map((m: any) => m.name).join(', ')}
+                            <span className="block text-[11px] text-red-600 ml-1 font-bold bg-red-50 px-1 py-0.5 rounded mt-0.5 border border-red-100 leading-tight inline-block italic">
+                                {item.modifiers.map((m: any) => m.name).join(', ')}
                             </span>
                         )}
                     </li>
@@ -297,105 +297,99 @@ export default function AdminDashboard() {
                     </button>
                 </div>
             ) : (
-                <div className="p-8 bg-gray-100 min-h-screen">
-                    <div className="flex justify-between items-center mb-8">
-                        <div className="flex items-center gap-6">
-                            <h1 className="text-4xl font-black text-gray-900">Aktuelle Bestellungen</h1>
-                            <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+                <div className="h-screen w-full bg-gray-100 flex flex-col overflow-hidden">
+                    {/* Compact Header */}
+                    <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-sm z-10">
+                        <div className="flex items-center gap-4">
+                            <h1 className="text-xl font-black text-gray-900 tracking-tight leading-none uppercase">KDS Dashboard</h1>
+                            <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'grid' ? 'bg-yellow-400 text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`px-3 py-1 rounded-md text-[11px] font-black transition-all ${viewMode === 'grid' ? 'bg-yellow-400 text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                                 >
-                                    Liste
+                                    LISTE
                                 </button>
                                 <button
                                     onClick={() => setViewMode('columns')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'columns' ? 'bg-yellow-400 text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`px-3 py-1 rounded-md text-[11px] font-black transition-all ${viewMode === 'columns' ? 'bg-yellow-400 text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                                 >
-                                    Spalten
+                                    SPALTEN
                                 </button>
                             </div>
                         </div>
-                        <div className={`px-6 py-3 rounded-full font-bold flex items-center gap-3 shadow-sm transition-all ${isConnected
-                                ? 'bg-green-100/50 border border-green-200 text-green-800'
-                                : 'bg-red-100/50 border border-red-200 text-red-800'
+
+                        <div className={`px-3 py-1.5 rounded-full font-bold flex items-center gap-2 text-[10px] uppercase tracking-wider ${isConnected
+                                ? 'bg-green-50 text-green-700 border border-green-200'
+                                : 'bg-red-50 text-red-700 border border-red-200'
                             }`}>
-                            <span className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500 animate-ping'}`}>
-                            </span>
-                            SSE Live Stream {isConnected ? 'aktiv' : 'getrennt'}
+                            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500 animate-ping'}`}></span>
+                            {isConnected ? 'LIVE' : 'OFFLINE'}
                         </div>
-                    </div>
+                    </header>
 
-                    {viewMode === 'grid' ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-start">
-                            {sortedVisibleOrders.map(order => (
-                                <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
-                            ))}
-
-                            {sortedVisibleOrders.length === 0 && (
-                                <div className="col-span-full h-[40vh] flex flex-col items-center justify-center text-gray-400 border-4 border-dashed border-gray-200 rounded-3xl">
-                                    <span className="text-6xl mb-4 opacity-50">🍽️</span>
-                                    <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-400 to-gray-300">Warten auf hungrige Kunden...</p>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-200px)] overflow-hidden">
-                            {/* Column 1: NEU */}
-                            <div className="flex-1 flex flex-col min-w-[300px]">
-                                <div className="flex justify-between items-center mb-3 bg-yellow-100 border border-yellow-200 px-4 py-2 rounded-xl">
-                                    <h3 className="font-black uppercase tracking-wider text-yellow-800 flex items-center gap-2">
-                                        <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                                        Neu
-                                    </h3>
-                                    <span className="bg-yellow-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                        {sortedVisibleOrders.filter(o => o.status === 'PENDING').length}
-                                    </span>
-                                </div>
-                                <div className="flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar">
-                                    {sortedVisibleOrders.filter(o => o.status === 'PENDING').map(order => (
+                    <main className="flex-1 overflow-hidden p-2 sm:p-3">
+                        {viewMode === 'grid' ? (
+                            <div className="h-full overflow-y-auto no-scrollbar">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-3 items-start">
+                                    {sortedVisibleOrders.map(order => (
                                         <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
                                     ))}
+                                    {sortedVisibleOrders.length === 0 && (
+                                        <div className="col-span-full h-[60vh] flex items-center justify-center text-gray-300 font-bold border-2 border-dashed border-gray-200 rounded-2xl">
+                                            Warten auf Bestellungen...
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                        ) : (
+                            <div className="flex h-full gap-3 overflow-hidden">
+                                {/* Column 1: NEU */}
+                                <div className="flex-1 flex flex-col min-w-[280px] bg-gray-200/50 rounded-xl overflow-hidden border border-gray-200">
+                                    <div className="bg-yellow-400 px-3 py-2 flex justify-between items-center shadow-sm">
+                                        <h3 className="font-black text-black text-xs uppercase tracking-widest">Neu</h3>
+                                        <span className="bg-black text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                            {sortedVisibleOrders.filter(o => o.status === 'PENDING').length}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-2 space-y-3 no-scrollbar pb-20">
+                                        {sortedVisibleOrders.filter(o => o.status === 'PENDING').map(order => (
+                                            <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
+                                        ))}
+                                    </div>
+                                </div>
 
-                            {/* Column 2: IN ARBEIT */}
-                            <div className="flex-1 flex flex-col min-w-[300px]">
-                                <div className="flex justify-between items-center mb-3 bg-blue-100 border border-blue-200 px-4 py-2 rounded-xl">
-                                    <h3 className="font-black uppercase tracking-wider text-blue-800 flex items-center gap-2">
-                                        <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                                        In Arbeit
-                                    </h3>
-                                    <span className="bg-blue-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                        {sortedVisibleOrders.filter(o => o.status === 'ACCEPTED').length}
-                                    </span>
+                                {/* Column 2: IN ARBEIT */}
+                                <div className="flex-1 flex flex-col min-w-[280px] bg-gray-200/50 rounded-xl overflow-hidden border border-gray-200">
+                                    <div className="bg-blue-500 px-3 py-2 flex justify-between items-center shadow-sm text-white">
+                                        <h3 className="font-black text-xs uppercase tracking-widest">In Arbeit</h3>
+                                        <span className="bg-white text-blue-600 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                            {sortedVisibleOrders.filter(o => o.status === 'ACCEPTED').length}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-2 space-y-3 no-scrollbar pb-20">
+                                        {sortedVisibleOrders.filter(o => o.status === 'ACCEPTED').map(order => (
+                                            <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar">
-                                    {sortedVisibleOrders.filter(o => o.status === 'ACCEPTED').map(order => (
-                                        <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
-                                    ))}
-                                </div>
-                            </div>
 
-                            {/* Column 3: ABHOLBEREIT */}
-                            <div className="flex-1 flex flex-col min-w-[300px]">
-                                <div className="flex justify-between items-center mb-3 bg-green-100 border border-green-200 px-4 py-2 rounded-xl">
-                                    <h3 className="font-black uppercase tracking-wider text-green-800 flex items-center gap-2">
-                                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                        Bereit
-                                    </h3>
-                                    <span className="bg-green-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                        {sortedVisibleOrders.filter(o => o.status === 'READY').length}
-                                    </span>
-                                </div>
-                                <div className="flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar">
-                                    {sortedVisibleOrders.filter(o => o.status === 'READY').map(order => (
-                                        <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
-                                    ))}
+                                {/* Column 3: BEREIT */}
+                                <div className="flex-1 flex flex-col min-w-[280px] bg-gray-200/50 rounded-xl overflow-hidden border border-gray-200">
+                                    <div className="bg-green-500 px-3 py-2 flex justify-between items-center shadow-sm text-white">
+                                        <h3 className="font-black text-xs uppercase tracking-widest">Bereit</h3>
+                                        <span className="bg-white text-green-600 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                            {sortedVisibleOrders.filter(o => o.status === 'READY').length}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-2 space-y-3 no-scrollbar pb-20">
+                                        {sortedVisibleOrders.filter(o => o.status === 'READY').map(order => (
+                                            <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </main>
 
 
                     {blacklistModalOrder && (
