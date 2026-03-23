@@ -203,6 +203,8 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
         );
     }
 
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
     const handleOrder = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
 
@@ -214,15 +216,15 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
         }
 
         if (!diningOption) {
-            alert("Bitte wählen Sie, ob Sie Vor-Ort essen oder mitnehmen möchten.");
+            setErrorMessage("Bitte wählen Sie, ob Sie Vor-Ort essen oder mitnehmen möchten.");
             return;
         }
         if (paymentMethods.length > 0 && !paymentMethod) {
-            alert("Bitte wählen Sie eine Zahlungsmethode.");
+            setErrorMessage("Bitte wählen Sie eine Zahlungsmethode.");
             return;
         }
         if (!turnstileToken && !isTestMode) {
-            alert("Bitte bestästigen Sie, dass Sie ein Mensch sind.");
+            setErrorMessage("Bitte bestätigen Sie, dass Sie ein Mensch sind.");
             return;
         }
 
@@ -234,7 +236,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
             finalPickupTime = new Date(berlinNow.getTime() + 20 * 60000).toISOString();
         } else if (time === "CUSTOM") {
             if (!customTime) {
-                alert("Bitte gib eine Uhrzeit ein.");
+                setErrorMessage("Bitte gib eine Uhrzeit ein.");
                 return;
             }
             const [hh, mm] = customTime.split(":").map(Number);
@@ -249,7 +251,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
                 
                 const timeStr = hh.toString().padStart(2, '0') + ':' + mm.toString().padStart(2, '0');
                 if (schedToday?.open && (timeStr < schedToday.open || timeStr > schedToday.close)) {
-                    alert(`Die gewählte Zeit (${timeStr} Uhr) liegt außerhalb unserer heutigen Öffnungszeiten (${schedToday.open} - ${schedToday.close} Uhr).`);
+                    setErrorMessage(`Die gewählte Zeit (${timeStr} Uhr) liegt außerhalb unserer heutigen Öffnungszeiten (${schedToday.open} – ${schedToday.close} Uhr).`);
                     return;
                 }
             }
@@ -277,7 +279,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
 
             const data = await res.json();
             if (!res.ok) {
-                alert("Error: " + data.error + (data.details ? "\nDetails: " + data.details : ""));
+                setErrorMessage("Error: " + data.error + (data.details ? "\nDetails: " + data.details : ""));
                 return;
             }
 
@@ -286,7 +288,7 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
             window.scrollTo({ top: 0, behavior: "smooth" });
             onComplete();
         } catch (e) {
-            alert("Fehler bei der Bestellung.");
+            setErrorMessage("Fehler bei der Bestellung.");
         } finally {
             setIsSubmitting(false);
         }
@@ -589,6 +591,23 @@ export default function Checkout({ onComplete, features = {}, products = [] }: {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Modal for error messages */}
+            {errorMessage && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-[#fffdf9] w-full max-w-sm rounded-3xl shadow-2xl border-4 border-[#8b1a1a] p-8 text-center animate-in zoom-in-95 duration-200">
+                        <div className="text-4xl mb-4">⚠️</div>
+                        <h3 className="text-xl font-black text-[#1a1008] mb-4">Hinweis</h3>
+                        <p className="text-[#5c4a32] font-semibold mb-8 whitespace-pre-wrap">{errorMessage}</p>
+                        <button 
+                            onClick={() => setErrorMessage(null)}
+                            className="w-full py-4 bg-[#8b1a1a] text-white font-bold rounded-2xl shadow-lg hover:bg-[#6e1313] transition-all active:scale-[0.95]"
+                        >
+                            Verstanden
+                        </button>
                     </div>
                 </div>
             )}
