@@ -105,6 +105,12 @@ export default function AdminDashboard() {
     const pendingStatusRef = useRef<Record<string, string>>({});
     const updatingOrderIdsRef = useRef<Set<string>>(new Set());
     const [viewMode, setViewMode] = useState<'grid' | 'columns'>('grid');
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const fetchInitial = async () => {
@@ -299,9 +305,9 @@ export default function AdminDashboard() {
             ) : (
                 <div className="h-screen w-full bg-gray-100 flex flex-col overflow-hidden">
                     {/* Compact Header */}
-                    <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-sm z-10">
+                    <header className="relative bg-white border-b border-gray-200 px-4 py-1.5 flex items-center justify-between shrink-0 shadow-sm z-10">
                         <div className="flex items-center gap-4">
-                            <h1 className="text-xl font-black text-gray-900 tracking-tight leading-none uppercase">KDS Dashboard</h1>
+                            <h1 className="text-xl font-black text-gray-900 tracking-tight leading-none uppercase">ISTANBUL GRILLHAUS</h1>
                             <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
                                 <button
                                     onClick={() => setViewMode('grid')}
@@ -316,6 +322,16 @@ export default function AdminDashboard() {
                                     SPALTEN
                                 </button>
                             </div>
+                        </div>
+
+                        {/* Digital Clock centered */}
+                        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
+                            <span className="text-2xl font-black text-gray-900 tabular-nums tracking-tighter leading-none">
+                                {currentTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </span>
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                                {currentTime.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' })}
+                            </span>
                         </div>
 
                         <div className={`px-3 py-1.5 rounded-full font-bold flex items-center gap-2 text-[10px] uppercase tracking-wider ${isConnected
@@ -346,13 +362,13 @@ export default function AdminDashboard() {
                                 {/* Column 1: NEU */}
                                 <div className="flex-1 flex flex-col min-w-[280px] bg-gray-200/50 rounded-xl overflow-hidden border border-gray-200">
                                     <div className="bg-yellow-400 px-3 py-2 flex justify-between items-center shadow-sm">
-                                        <h3 className="font-black text-black text-xs uppercase tracking-widest">Neu</h3>
+                                        <h3 className="font-black text-black text-xs uppercase tracking-widest">Neu / Storniert</h3>
                                         <span className="bg-black text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                                            {sortedVisibleOrders.filter(o => o.status === 'PENDING').length}
+                                            {sortedVisibleOrders.filter(o => o.status === 'PENDING' || o.status === 'CANCELLED').length}
                                         </span>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-2 space-y-3 no-scrollbar pb-20">
-                                        {sortedVisibleOrders.filter(o => o.status === 'PENDING').map(order => (
+                                        {sortedVisibleOrders.filter(o => o.status === 'PENDING' || o.status === 'CANCELLED').map(order => (
                                             <OrderCard key={order.id} order={order} updateStatus={updateStatus} deleteOrder={deleteOrder} setBlacklistModalOrder={setBlacklistModalOrder} />
                                         ))}
                                     </div>
