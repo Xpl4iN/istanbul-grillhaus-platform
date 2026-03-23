@@ -42,6 +42,13 @@ const OrderCard = ({
                     🗑️ Löschen
                 </button>
             )}
+            <button
+                onClick={() => setBlacklistModalOrder(order)}
+                className="bg-gray-100 hover:bg-red-50 text-xl font-bold p-3 rounded-lg transition-all shadow-sm w-14 flex items-center justify-center border border-gray-200"
+                title="Kunde blockieren"
+            >
+                🚨
+            </button>
         </div>
 
         <div className="flex justify-between items-start pt-3 gap-2 border-t border-gray-100">
@@ -82,16 +89,6 @@ const OrderCard = ({
                     </li>
                 ))}
             </ul>
-        </div>
-
-        <div className="flex justify-end pt-2 border-t border-gray-50">
-            <button
-                onClick={() => setBlacklistModalOrder(order)}
-                className="text-gray-300 hover:text-red-400 transition-colors p-1"
-                title="Kunde blockieren"
-            >
-                🚨
-            </button>
         </div>
     </div>
 );
